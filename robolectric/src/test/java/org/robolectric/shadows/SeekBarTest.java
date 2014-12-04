@@ -5,10 +5,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 import org.robolectric.util.Transcript;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class SeekBarTest {
@@ -20,8 +22,8 @@ public class SeekBarTest {
 
   @Before
   public void setup() {
-    seekBar = new SeekBar(Robolectric.application);
-    shadow = Robolectric.shadowOf(seekBar);
+    seekBar = new SeekBar(RuntimeEnvironment.application);
+    shadow = Shadows.shadowOf(seekBar);
     listener = new TestSeekBarChangedListener();
     transcript = new Transcript();
     seekBar.setOnSeekBarChangeListener(listener);

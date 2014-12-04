@@ -21,11 +21,12 @@ import android.os.RemoteException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.AndroidManifest;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.manifest.AndroidManifest;
 import org.robolectric.DefaultTestLifecycle;
-import org.robolectric.Robolectric;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
-import org.robolectric.res.ContentProviderData;
+import org.robolectric.manifest.ContentProviderData;
 import org.robolectric.tester.android.database.TestCursor;
 
 import java.io.ByteArrayInputStream;
@@ -35,10 +36,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class ContentResolverTest {
@@ -507,7 +508,7 @@ public class ContentResolverTest {
   @Test
   public void shouldRegisterContentObservers() throws Exception {
     TestContentObserver co = new TestContentObserver(null);
-    ShadowContentResolver scr = Robolectric.shadowOf(contentResolver);
+    ShadowContentResolver scr = Shadows.shadowOf(contentResolver);
 
     assertThat(scr.getContentObserver(EXTERNAL_CONTENT_URI)).isNull();
 
@@ -526,7 +527,7 @@ public class ContentResolverTest {
   @Test
   public void shouldUnregisterContentObservers() throws Exception {
     TestContentObserver co = new TestContentObserver(null);
-    ShadowContentResolver scr = Robolectric.shadowOf(contentResolver);
+    ShadowContentResolver scr = Shadows.shadowOf(contentResolver);
     contentResolver.registerContentObserver(EXTERNAL_CONTENT_URI, true, co);
     assertThat(scr.getContentObserver(EXTERNAL_CONTENT_URI)).isSameAs((ContentObserver) co);
 
@@ -540,14 +541,19 @@ public class ContentResolverTest {
 
   @Test
   public void getProvider_shouldCreateProviderFromManifest() {
-    AndroidManifest manifest = Robolectric.getShadowApplication().getAppManifest();
-    manifest.getContentProviders().add(new ContentProviderData("org.robolectric.shadows.ContentResolverTest$TestContentProvider", AUTHORITY));
-    assertThat(ShadowContentResolver.getProvider(Uri.parse("content://" + AUTHORITY + "/shadows"))).isNotNull();
+    AndroidManifest manifest = ShadowApplication.getInstance().getAppManifest();
+    ContentProviderData testProviderData = new ContentProviderData("org.robolectric.shadows.ContentResolverTest$TestContentProvider", AUTHORITY);
+    try {
+      manifest.getContentProviders().add(testProviderData);
+      assertThat(ShadowContentResolver.getProvider(Uri.parse("content://" + AUTHORITY + "/shadows"))).isNotNull();
+    } finally {
+      manifest.getContentProviders().remove(testProviderData);
+    }
   }
 
   @Test
   public void getProvider_shouldNotReturnAnyProviderWhenManifestIsNull() {
-    Robolectric.application = new DefaultTestLifecycle().createApplication(null, null, null);
+    RuntimeEnvironment.application = new DefaultTestLifecycle().createApplication(null, null, null);
     assertThat(ShadowContentResolver.getProvider(Uri.parse("content://"))).isNull();
   }
 

@@ -1,58 +1,60 @@
 package org.robolectric.util;
 
-import static org.fest.reflect.core.Reflection.constructor;
-import static org.fest.reflect.core.Reflection.method;
-import static org.fest.reflect.core.Reflection.type;
-
-import org.robolectric.Robolectric;
-import org.robolectric.shadows.ShadowActivityThread;
-import org.robolectric.shadows.ShadowService;
-
 import android.app.Application;
 import android.app.Service;
 import android.content.Context;
 import android.os.IBinder;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.ShadowsAdapter;
+import org.robolectric.util.ReflectionHelpers.ClassParameter;
 
-public class ServiceController<T extends Service> extends ComponentController<ServiceController<T>, T, ShadowService>{
+public class ServiceController<T extends Service> extends ComponentController<ServiceController<T>, T>{
 
-  public static <T extends Service> ServiceController<T> of(Class<T> serviceClass) {
-    return new ServiceController<T>(serviceClass);
+  private String shadowActivityThreadClassName;
+
+  public static <T extends Service> ServiceController<T> of(ShadowsAdapter shadowsAdapter, Class<T> serviceClass) {
+    try {
+      return new ServiceController<T>(shadowsAdapter, serviceClass);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InstantiationException e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  public static <T extends Service> ServiceController<T> of(T service) {
-    return new ServiceController<T>(service);
+  public static <T extends Service> ServiceController<T> of(ShadowsAdapter shadowsAdapter, T service) {
+    return new ServiceController<T>(shadowsAdapter, service);
   }
 
-  public ServiceController(Class<T> serviceClass) {
-    this(constructor().in(serviceClass).newInstance());
+  public ServiceController(ShadowsAdapter shadowsAdapter, Class<T> serviceClass) throws IllegalAccessException, InstantiationException {
+    this(shadowsAdapter, serviceClass.newInstance());
   }
 
-  public ServiceController(T service) {
-    super(service);
+  public ServiceController(ShadowsAdapter shadowsAdapter, T service) {
+    super(shadowsAdapter, service);
+    shadowActivityThreadClassName = shadowsAdapter.getShadowActivityThreadClassName();
   }
 
   public ServiceController<T> attach() {
-    Application application = this.application == null ? Robolectric.application : this.application;
+    Application application = this.application == null ? RuntimeEnvironment.application : this.application;
     Context baseContext = this.baseContext == null ? application : this.baseContext;
 
     ClassLoader cl = baseContext.getClassLoader();
-    Class<?> activityThreadClass = type(ShadowActivityThread.CLASS_NAME).withClassLoader(cl).load();
-    
-    method("attach").withParameterTypes(
-        Context.class /* context */,
-        activityThreadClass /* aThread */,
-        String.class /* className */,
-        IBinder.class /* token */,
-        Application.class /* application */,
-        Object.class /* activityManager */
-        
-    ).in(component).invoke(
-        baseContext,
-        null /* aThread */,
-        component.getClass().getSimpleName(), /* className */
-        null /* token */,
-        application,
-        null /* activityManager */);
+    Class<?> activityThreadClass;
+    try {
+      activityThreadClass = cl.loadClass(shadowActivityThreadClassName);
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+
+    ReflectionHelpers.callInstanceMethodReflectively(component, "attach",
+        ClassParameter.from(Context.class, baseContext),
+        ClassParameter.from(activityThreadClass, null),
+        ClassParameter.from(String.class, component.getClass().getSimpleName()),
+        ClassParameter.from(IBinder.class, null),
+        ClassParameter.from(Application.class, application),
+        ClassParameter.from(Object.class, null));
 
     attached = true;
     return this;
@@ -72,12 +74,12 @@ public class ServiceController<T extends Service> extends ComponentController<Se
     invokeWhilePaused("onDestroy");
     return this;
   }
-  
+
   public ServiceController<T> rebind() {
     invokeWhilePaused("onRebind", getIntent());
     return this;
   }
-  
+
   public ServiceController<T> startCommand(int flags, int startId) {
     invokeWhilePaused("onStartCommand", getIntent(), flags, startId);
     return this;

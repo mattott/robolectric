@@ -8,9 +8,11 @@ import org.junit.runner.RunWith;
 import org.robolectric.TestRunners;
 
 import static android.content.Context.TELEPHONY_SERVICE;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.robolectric.Robolectric.*;
+import static org.robolectric.RuntimeEnvironment.*;
+import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.internal.Shadow.newInstanceOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class TelephonyManagerTest {
@@ -67,6 +69,14 @@ public class TelephonyManagerTest {
     assertEquals("SomeOperator", telephonyManager.getNetworkOperator());
   }
 
+  @Test
+  public void shouldGiveLine1Number() {
+    TelephonyManager telephonyManager = (TelephonyManager) application.getSystemService(TELEPHONY_SERVICE);
+    ShadowTelephonyManager shadowTelephonyManager = shadowOf(telephonyManager);
+    shadowTelephonyManager.setLine1Number("123-244-2222");
+    assertEquals("123-244-2222", telephonyManager.getLine1Number());
+  }
+  
   @Test(expected = SecurityException.class)
   public void getDeviceId_shouldThrowSecurityExceptionWhenReadPhoneStatePermissionNotGranted() throws Exception {
     shadowManager.setReadPhoneStatePermission(false);

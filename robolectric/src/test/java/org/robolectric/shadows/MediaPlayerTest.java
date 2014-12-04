@@ -5,10 +5,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.robolectric.Robolectric;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
+import org.robolectric.internal.Shadow;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class MediaPlayerTest {
@@ -18,8 +19,15 @@ public class MediaPlayerTest {
 
   @Before
   public void setUp() throws Exception {
-    mediaPlayer = Robolectric.newInstanceOf(MediaPlayer.class);
-    shadowMediaPlayer = Robolectric.shadowOf(mediaPlayer);
+    mediaPlayer = Shadow.newInstanceOf(MediaPlayer.class);
+    shadowMediaPlayer = Shadows.shadowOf(mediaPlayer);
+  }
+
+  @Test
+  public void isPlaying_shouldBeFalseUntilPlayIsCalled() {
+    assertThat(mediaPlayer.isPlaying()).isFalse();
+    mediaPlayer.start();
+    assertThat(mediaPlayer.isPlaying()).isTrue();
   }
 
   @Test

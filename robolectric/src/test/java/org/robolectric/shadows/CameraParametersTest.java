@@ -3,17 +3,17 @@ package org.robolectric.shadows;
 
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
-
-import org.fest.util.Lists;
+import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
+import org.robolectric.internal.Shadow;
 
 import java.util.List;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class CameraParametersTest {
@@ -23,8 +23,8 @@ public class CameraParametersTest {
 
   @Before
   public void setUp() throws Exception {
-    parameters = Robolectric.newInstanceOf(Camera.Parameters.class);
-    shadowParameters = Robolectric.shadowOf(parameters);
+    parameters = Shadow.newInstanceOf(Camera.Parameters.class);
+    shadowParameters = Shadows.shadowOf(parameters);
   }
 
   @Test
@@ -163,6 +163,4 @@ public class CameraParametersTest {
     parameters.setFocusMode("foo");
     assertThat(parameters.getFocusMode()).isEqualTo("foo");
   }
-
-
 }

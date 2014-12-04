@@ -1,10 +1,8 @@
 package org.robolectric.shadows;
 
 import android.app.Activity;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.View;
@@ -13,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.R;
 import org.robolectric.Robolectric;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 import org.robolectric.res.ResName;
 import org.robolectric.res.ResourceLoader;
@@ -20,7 +19,7 @@ import org.robolectric.res.Style;
 import org.robolectric.util.ActivityController;
 import org.robolectric.util.TestUtil;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.buildActivity;
 
 @RunWith(TestRunners.WithDefaults.class)
@@ -104,7 +103,7 @@ public class ThemeTest {
 
   @Test public void shouldInheritThemeValuesFromImplicitParents() throws Exception {
     TestActivity activity = buildActivity(TestActivityWithAnotherTheme.class).create().get();
-    ResourceLoader resourceLoader = Robolectric.shadowOf(activity.getResources()).getResourceLoader();
+    ResourceLoader resourceLoader = Shadows.shadowOf(activity.getResources()).getResourceLoader();
     Style style = ShadowAssetManager.resolveStyle(resourceLoader,
         null,
         new ResName(TestUtil.TEST_PACKAGE, "style", "Widget.AnotherTheme.Button.Blarf"), "");
@@ -114,7 +113,7 @@ public class ThemeTest {
 
   @Test public void whenAThemeHasExplicitlyEmptyParentAttr_shouldHaveNoParent() throws Exception {
     TestActivity activity = buildActivity(TestActivityWithAnotherTheme.class).create().get();
-    ResourceLoader resourceLoader = Robolectric.shadowOf(activity.getResources()).getResourceLoader();
+    ResourceLoader resourceLoader = Shadows.shadowOf(activity.getResources()).getResourceLoader();
     Style style = ShadowAssetManager.resolveStyle(resourceLoader,
         null,
         new ResName(TestUtil.TEST_PACKAGE, "style", "Theme.MyTheme"), "");
@@ -124,7 +123,7 @@ public class ThemeTest {
 
   @Test public void shouldApplyParentStylesFromAttrs() throws Exception {
     TestActivity activity = buildActivity(TestActivityWithAnotherTheme.class).create().get();
-    ResourceLoader resourceLoader = Robolectric.shadowOf(activity.getResources()).getResourceLoader();
+    ResourceLoader resourceLoader = Shadows.shadowOf(activity.getResources()).getResourceLoader();
     Style theme = ShadowAssetManager.resolveStyle(resourceLoader, null,
         new ResName(TestUtil.TEST_PACKAGE, "style", "Theme.AnotherTheme"), "");
     Style style = ShadowAssetManager.resolveStyle(resourceLoader, theme,

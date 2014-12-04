@@ -8,10 +8,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
 import static junit.framework.Assert.*;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class EditTextPreferenceTest {
@@ -23,7 +24,7 @@ public class EditTextPreferenceTest {
 
   @Before
   public void setup() {
-    context = Robolectric.application;
+    context = RuntimeEnvironment.application;
     preference = new EditTextPreference(context);
   }
 

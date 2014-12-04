@@ -6,7 +6,8 @@ import org.robolectric.TestRunners;
 import android.view.Surface;
 import android.graphics.SurfaceTexture;
 import static org.robolectric.Robolectric.*;
-import static org.fest.assertions.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class SurfaceTest {

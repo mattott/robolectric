@@ -9,16 +9,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.R;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 import org.robolectric.tester.android.view.TestMenu;
 import org.robolectric.tester.android.view.TestMenuItem;
-import org.robolectric.util.I18nException;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.robolectric.Robolectric.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class MenuInflaterTest {
@@ -26,7 +25,7 @@ public class MenuInflaterTest {
 
   @Before
   public void setUp() throws Exception {
-    context = Robolectric.application;
+    context = RuntimeEnvironment.application;
   }
 
   @Test
@@ -60,12 +59,6 @@ public class MenuInflaterTest {
     assertTrue(mi.hasSubMenu());
     assertThat(mi.getSubMenu().size()).isEqualTo(2);
     assertThat(mi.getSubMenu().getItem(1).getTitle() + "").isEqualTo("Test menu item 3");
-  }
-
-  @Test(expected=I18nException.class)
-  public void shouldThrowExceptionOnI18nStrictModeInflateMenu() throws Exception {
-    shadowOf(context).setStrictI18n(true);
-    new MenuInflater(context).inflate(R.menu.test, new TestMenu());
   }
 
   @Test

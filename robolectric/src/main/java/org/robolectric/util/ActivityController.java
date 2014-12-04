@@ -1,77 +1,87 @@
 package org.robolectric.util;
 
-import static org.fest.reflect.core.Reflection.constructor;
-import static org.fest.reflect.core.Reflection.field;
-import static org.fest.reflect.core.Reflection.method;
-import static org.fest.reflect.core.Reflection.type;
-import static org.robolectric.Robolectric.shadowOf_;
-
-import org.robolectric.AndroidManifest;
-import org.robolectric.RoboInstrumentation;
-import org.robolectric.Robolectric;
-import org.robolectric.res.ResName;
-import org.robolectric.shadows.ShadowActivity;
-import org.robolectric.shadows.ShadowActivityThread;
-import org.robolectric.shadows.ShadowApplication;
-
 import android.app.Activity;
 import android.app.Application;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.view.View;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.ShadowsAdapter;
+import org.robolectric.manifest.AndroidManifest;
+import org.robolectric.RoboInstrumentation;
+import org.robolectric.res.ResName;
+import org.robolectric.ShadowsAdapter.ShadowActivityAdapter;
+import org.robolectric.ShadowsAdapter.ShadowApplicationAdapter;
+import org.robolectric.util.ReflectionHelpers.ClassParameter;
 
-public class ActivityController<T extends Activity>
-  extends ComponentController<ActivityController<T>, T, ShadowActivity>{
+public class ActivityController<T extends Activity> extends ComponentController<ActivityController<T>, T> {
 
-  public static <T extends Activity> ActivityController<T> of(Class<T> activityClass) {
-    return new ActivityController<T>(activityClass);
+  private final ShadowActivityAdapter shadowReference;
+  private final ShadowsAdapter shadowsAdapter;
+
+  public static <T extends Activity> ActivityController<T> of(ShadowsAdapter shadowsAdapter, Class<T> activityClass) {
+    return new ActivityController<T>(shadowsAdapter, ReflectionHelpers.<T>callConstructorReflectively(activityClass));
   }
 
-  public static <T extends Activity> ActivityController<T> of(T activity) {
-    return new ActivityController<T>(activity);
+  public static <T extends Activity> ActivityController<T> of(ShadowsAdapter shadowsAdapter, T activity) {
+    return new ActivityController<T>(shadowsAdapter, activity);
   }
 
-  public ActivityController(Class<T> activityClass) {
-    this(constructor().in(activityClass).newInstance());
-  }
-
-  public ActivityController(T activity) {
-    super(activity);
+  public ActivityController(ShadowsAdapter shadowsAdapter, T activity) {
+    super(shadowsAdapter, activity);
+    this.shadowsAdapter = shadowsAdapter;
+    shadowReference = shadowsAdapter.getShadowActivityAdapter(this.component);
   }
 
   public ActivityController<T> attach() {
-    Application application = this.application == null ? Robolectric.application : this.application;
+    Application application = this.application == null ? RuntimeEnvironment.application : this.application;
+    if (this.application != null) {
+      shadowsAdapter.prepareShadowApplicationWithExistingApplication(this.application);
+      this.application.onCreate();
+      shadowReference.setTestApplication(this.application);
+    }
     Context baseContext = this.baseContext == null ? application : this.baseContext;
     Intent intent = getIntent();
     ActivityInfo activityInfo = new ActivityInfo();
+    ReflectionHelpers.setFieldReflectively(activityInfo, "applicationInfo", new ApplicationInfo());
     String activityTitle = getActivityTitle();
 
     ClassLoader cl = baseContext.getClassLoader();
-    Class<?> activityThreadClass = type(ShadowActivityThread.CLASS_NAME).withClassLoader(cl).load();
-    Class<?> nonConfigurationInstancesClass = type("android.app.Activity$NonConfigurationInstances")
-        .withClassLoader(cl).load();
+    Class<?> activityThreadClass = null;
+    try {
+      activityThreadClass = cl.loadClass(shadowsAdapter.getShadowActivityThreadClassName());
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+    Class<?> nonConfigurationInstancesClass = null;
+    try {
+      nonConfigurationInstancesClass = cl.loadClass("android.app.Activity$NonConfigurationInstances");
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
 
-    method("attach").withParameterTypes(
-        Context.class /* context */, activityThreadClass /* aThread */,
-        Instrumentation.class /* instr */, IBinder.class /* token */, int.class /* ident */,
-        Application.class /* application */, Intent.class /* intent */, ActivityInfo.class /* info */,
-        CharSequence.class /* title */, Activity.class /* parent */, String.class /* id */,
-        nonConfigurationInstancesClass /* lastNonConfigurationInstances */,
-        Configuration.class /* config */
-    ).in(component).invoke(baseContext, null /* aThread */,
-        new RoboInstrumentation(), null /* token */, 0 /* ident */,
-        application, intent /* intent */, activityInfo,
-        activityTitle, null /* parent */, "id",
-        null /* lastNonConfigurationInstances */,
-        application.getResources().getConfiguration());
+    ReflectionHelpers.callInstanceMethodReflectively(component, "attach",
+        ClassParameter.from(Context.class, baseContext),
+        ClassParameter.from(activityThreadClass, null),
+        ClassParameter.from(Instrumentation.class, new RoboInstrumentation()),
+        ClassParameter.from(IBinder.class, null),
+        ClassParameter.from(int.class, 0),
+        ClassParameter.from(Application.class, application),
+        ClassParameter.from(Intent.class, intent),
+        ClassParameter.from(ActivityInfo.class, activityInfo),
+        ClassParameter.from(CharSequence.class, activityTitle),
+        ClassParameter.from(Activity.class, null),
+        ClassParameter.from(String.class, "id"),
+        ClassParameter.from(nonConfigurationInstancesClass, null),
+        ClassParameter.from(Configuration.class, application.getResources().getConfiguration()));
 
-    shadow.setThemeFromManifest();
+    shadowReference.setThemeFromManifest();
     attached = true;
     return this;
   }
@@ -80,16 +90,16 @@ public class ActivityController<T extends Activity>
     String title = null;
 
     /* Get the label for the activity from the manifest */
-    ShadowApplication shadowApplication = shadowOf_(component.getApplication());
-    AndroidManifest appManifest = shadowApplication.getAppManifest();
+    ShadowApplicationAdapter shadowApplicationAdapter = shadowsAdapter.getApplicationAdapter(component);
+    AndroidManifest appManifest = shadowApplicationAdapter.getAppManifest();
     if (appManifest == null) return null;
     String labelRef = appManifest.getActivityLabel(component.getClass());
 
     if (labelRef != null) {
-      if(labelRef.startsWith("@")){
+      if (labelRef.startsWith("@")) {
         /* Label refers to a string value, get the resource identifier */
         ResName style = ResName.qualifyResName(labelRef.replace("@", ""), appManifest.getPackageName(), "string");
-        Integer labelRes = shadowApplication.getResourceLoader().getResourceIndex().getResourceId(style);
+        Integer labelRes = shadowApplicationAdapter.getResourceLoader().getResourceIndex().getResourceId(style);
 
         /* If we couldn't determine the resource ID, throw it up */
         if (labelRes == null) {
@@ -108,9 +118,10 @@ public class ActivityController<T extends Activity>
 
   public ActivityController<T> create(final Bundle bundle) {
     shadowMainLooper.runPaused(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         if (!attached) attach();
-        method("performCreate").withParameterTypes(Bundle.class).in(component).invoke(bundle);
+        ReflectionHelpers.callInstanceMethodReflectively(component, "performCreate", ClassParameter.from(Bundle.class, bundle));
       }
     });
     return this;
@@ -162,9 +173,10 @@ public class ActivityController<T extends Activity>
 
   public ActivityController<T> visible() {
     shadowMainLooper.runPaused(new Runnable() {
-      @Override public void run() {
-        field("mDecor").ofType(View.class).in(component).set(component.getWindow().getDecorView());
-        method("makeVisible").in(component).invoke();
+      @Override
+      public void run() {
+        ReflectionHelpers.setFieldReflectively(component, "mDecor", component.getWindow().getDecorView());
+        ReflectionHelpers.callInstanceMethodReflectively(component, "makeVisible");
       }
     });
 
@@ -192,16 +204,19 @@ public class ActivityController<T extends Activity>
   }
 
   /**
-   * Calls the same lifecycle methods on the Activity called by
-   * Android the first time the Activity is created.
+   * Calls the same lifecycle methods on the Activity called by Android the first time the Activity is created.
+   *
+   * @return Activity controller instance.
    */
   public ActivityController<T> setup() {
     return create().start().postCreate(null).resume().visible();
   }
 
   /**
-   * Calls the same lifecycle methods on the Activity called by
-   * Android when an Activity is restored from previously saved state.
+   * Calls the same lifecycle methods on the Activity called by Android when an Activity is restored from previously saved state.
+   *
+   * @param savedInstanceState Saved instance state.
+   * @return Activity controller instance.
    */
   public ActivityController<T> setup(Bundle savedInstanceState) {
     return create(savedInstanceState)

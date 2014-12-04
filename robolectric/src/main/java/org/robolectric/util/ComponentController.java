@@ -1,23 +1,18 @@
 package org.robolectric.util;
 
-import static org.fest.reflect.core.Reflection.constructor;
-import static org.fest.reflect.core.Reflection.method;
-import static org.robolectric.Robolectric.shadowOf_;
-
-import org.robolectric.Robolectric;
-import org.robolectric.shadows.ShadowLooper;
-
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Looper;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.ShadowsAdapter;
+import org.robolectric.ShadowsAdapter.ShadowLooperAdapter;
+import org.robolectric.util.ReflectionHelpers.ClassParameter;
 
-abstract class ComponentController<C extends ComponentController<C, T, S>, T, S> {
+abstract class ComponentController<C extends ComponentController<C, T>, T> {
   protected final C myself;
   protected final T component;
-  protected final S shadow;
-  protected final ShadowLooper shadowMainLooper;
+  protected final ShadowLooperAdapter shadowMainLooper;
 
   protected Application application;
   protected Context baseContext;
@@ -25,16 +20,15 @@ abstract class ComponentController<C extends ComponentController<C, T, S>, T, S>
 
   protected boolean attached;
 
-  public ComponentController(Class<T> componentClass) {
-    this(constructor().in(componentClass).newInstance());
+  public ComponentController(ShadowsAdapter shadowsAdapter, Class<T> componentClass) throws IllegalAccessException, InstantiationException {
+    this(shadowsAdapter, componentClass.newInstance());
   }
 
   @SuppressWarnings("unchecked")
-  public ComponentController(T component) {
-    myself = (C)this;
+  public ComponentController(ShadowsAdapter shadowsAdapter, T component) {
+    myself = (C) this;
     this.component = component;
-    shadow = shadowOf_(component);
-    shadowMainLooper = shadowOf_(Looper.getMainLooper());
+    shadowMainLooper = shadowsAdapter.getMainLooper();
   }
 
   public T get() {
@@ -63,18 +57,19 @@ abstract class ComponentController<C extends ComponentController<C, T, S>, T, S>
   public abstract C destroy();
 
   public Intent getIntent() {
-    Application application = this.application == null ? Robolectric.application : this.application;
+    Application application = this.application == null ? RuntimeEnvironment.application : this.application;
     Intent intent = this.intent == null ? new Intent(application, component.getClass()) : this.intent;
     if (intent.getComponent() == null) {
       intent.setClass(application, component.getClass());
     }
     return intent;
   }
-  
+
   protected C invokeWhilePaused(final String methodName) {
     shadowMainLooper.runPaused(new Runnable() {
-      @Override public void run() {
-        method(methodName).in(component).invoke();
+      @Override
+      public void run() {
+        ReflectionHelpers.callInstanceMethodReflectively(component, methodName);
       }
     });
     return myself;
@@ -82,8 +77,9 @@ abstract class ComponentController<C extends ComponentController<C, T, S>, T, S>
 
   protected C invokeWhilePaused(final String methodName, final Bundle arg) {
     shadowMainLooper.runPaused(new Runnable() {
-      @Override public void run() {
-        method(methodName).withParameterTypes(Bundle.class).in(component).invoke(arg);
+      @Override
+      public void run() {
+        ReflectionHelpers.callInstanceMethodReflectively(component, methodName, ClassParameter.from(Bundle.class, arg));
       }
     });
     return myself;
@@ -91,17 +87,19 @@ abstract class ComponentController<C extends ComponentController<C, T, S>, T, S>
 
   protected C invokeWhilePaused(final String methodName, final Intent arg) {
     shadowMainLooper.runPaused(new Runnable() {
-      @Override public void run() {
-        method(methodName).withParameterTypes(Intent.class).in(component).invoke(arg);
+      @Override
+      public void run() {
+        ReflectionHelpers.callInstanceMethodReflectively(component, methodName, ClassParameter.from(Intent.class, arg));
       }
     });
     return myself;
   }
-  
+
   protected C invokeWhilePaused(final String methodName, final Intent arg, final int param1, final int param2) {
     shadowMainLooper.runPaused(new Runnable() {
-      @Override public void run() {
-        method(methodName).withParameterTypes(Intent.class, int.class, int.class).in(component).invoke(arg, param1, param2);
+      @Override
+      public void run() {
+        ReflectionHelpers.callInstanceMethodReflectively(component, methodName, ClassParameter.from(Intent.class, arg), ClassParameter.from(int.class, param1), ClassParameter.from(int.class, param2));
       }
     });
     return myself;

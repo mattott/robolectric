@@ -8,13 +8,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class SpinnerTest {
@@ -23,7 +24,7 @@ public class SpinnerTest {
 
   @Before
   public void beforeTests() {
-    spinner = new Spinner(Robolectric.application);
+    spinner = new Spinner(RuntimeEnvironment.application);
   }
 
   @Test
@@ -35,7 +36,7 @@ public class SpinnerTest {
 
   @Test
   public void selectItemWithText_callsOnItemSelectedListener() throws Exception {
-    ArrayAdapter<String> adapter = new ArrayAdapter<String>(Robolectric.application, android.R.layout.simple_spinner_dropdown_item);
+    ArrayAdapter<String> adapter = new ArrayAdapter<String>(RuntimeEnvironment.application, android.R.layout.simple_spinner_dropdown_item);
     adapter.add("Your Item");
     adapter.add("My Item");
     spinner.setAdapter(adapter);

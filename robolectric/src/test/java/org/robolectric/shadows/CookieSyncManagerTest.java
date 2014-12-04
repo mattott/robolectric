@@ -4,10 +4,10 @@ import android.app.Activity;
 import android.webkit.CookieSyncManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class CookieSyncManagerTest {
@@ -28,7 +28,7 @@ public class CookieSyncManagerTest {
     CookieSyncManager.createInstance(new Activity());
     CookieSyncManager mgr = CookieSyncManager.getInstance();
 
-    ShadowCookieSyncManager shadowManager = Robolectric.shadowOf(mgr);
+    ShadowCookieSyncManager shadowManager = Shadows.shadowOf(mgr);
     assertThat(shadowManager.synced()).isFalse();
     mgr.sync();
     assertThat(shadowManager.synced()).isTrue();

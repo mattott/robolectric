@@ -10,9 +10,8 @@
 
   <groupId>org.robolectric</groupId>
   <artifactId>robolectric-parent</artifactId>
-  <version>2.4-SNAPSHOT</version>
+  <version>3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>Robolectric All</name>
   <description>An alternative Android testing framework.</description>
   <url>http://robolectric.org/</url>
 
@@ -20,16 +19,27 @@
     <module>robolectric</module>
     <module>robolectric-annotations</module>
     <module>robolectric-processor</module>
+    <module>robolectric-resources</module>
+    <module>robolectric-shadows</module>
+    <module>robolectric-utils</module>
   </modules>
-  
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+    <libsqlite.version>0.282-3</libsqlite.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <!-- Robolectric Dependencies -->
+      <dependency>
+        <groupId>org.robolectric</groupId>
+        <artifactId>robolectric</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
       <dependency>
         <groupId>org.robolectric</groupId>
         <artifactId>robolectric-annotations</artifactId>
@@ -37,17 +47,57 @@
       </dependency>
 
       <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit-dep</artifactId>
-        <version>4.8.2</version>
-        <scope>provided</scope>
+        <groupId>org.robolectric</groupId>
+        <artifactId>robolectric-fakehttp</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.robolectric</groupId>
+        <artifactId>robolectric-utils</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.robolectric</groupId>
+        <artifactId>robolectric-resources</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.robolectric</groupId>
+        <artifactId>shadows-core</artifactId>
+        <version>${project.version}</version>
+        <classifier>19</classifier>
+      </dependency>
+
+      <!-- Test Dependencies -->
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>1.7.0</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>1.9.5</version>
+        <scope>test</scope>
       </dependency>
 
       <dependency>
         <groupId>org.robolectric</groupId>
         <artifactId>android-all</artifactId>
-        <version>4.3_r2-robolectric-0</version>
+        <version>4.4_r1-robolectric-0</version>
         <scope>provided</scope>
+      </dependency>
+
+      <!-- Project Dependencies -->
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit-dep</artifactId>
+        <version>4.8.2</version>
       </dependency>
 
       <dependency>
@@ -55,24 +105,64 @@
         <artifactId>guava</artifactId>
         <version>16.0.1</version>
       </dependency>
-      
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-core</artifactId>
-        <version>1.9.5</version>
-        <scope>test</scope>
-      </dependency>
-      
-      <dependency>
-        <groupId>org.easytesting</groupId>
-        <artifactId>fest-util</artifactId>
-        <version>1.2.5</version>
-      </dependency>
 
       <dependency>
         <groupId>com.intellij</groupId>
         <artifactId>annotations</artifactId>
         <version>12.0</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.0.3</version>
+      </dependency>
+
+      <!-- SQLite Dependencies -->
+      <dependency>
+        <groupId>com.almworks.sqlite4java</groupId>
+        <artifactId>sqlite4java</artifactId>
+        <version>0.282</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.github.axet.litedb</groupId>
+        <artifactId>libsqlite</artifactId>
+        <version>${libsqlite.version}</version>
+        <classifier>natives-windows-x86</classifier>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.github.axet.litedb</groupId>
+        <artifactId>libsqlite</artifactId>
+        <version>${libsqlite.version}</version>
+        <classifier>natives-windows-x86_64</classifier>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.github.axet.litedb</groupId>
+        <artifactId>libsqlite</artifactId>
+        <version>${libsqlite.version}</version>
+        <classifier>natives-mac-x86_64</classifier>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.github.axet.litedb</groupId>
+        <artifactId>libsqlite</artifactId>
+        <version>${libsqlite.version}</version>
+        <classifier>natives-linux-x86</classifier>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.github.axet.litedb</groupId>
+        <artifactId>libsqlite</artifactId>
+        <classifier>natives-linux-x86_64</classifier>
+        <version>${libsqlite.version}</version>
         <scope>provided</scope>
       </dependency>
     </dependencies>
@@ -82,6 +172,7 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.3.2</version>
           <configuration>
@@ -92,43 +183,20 @@
         </plugin>
 
         <plugin>
-          <groupId>org.bsc.maven</groupId>
-          <artifactId>maven-processor-plugin</artifactId>
-          <version>2.2.1</version>
-          <configuration>
-            <compilerArguments>-source ${maven.compiler.source} -target ${maven.compiler.target}</compilerArguments>
-          </configuration>
-          <executions>
-            <execution>
-              <id>process</id>
-              <goals>
-                <goal>process</goal>
-              </goals>
-              <phase>generate-sources</phase>
-            </execution>
-          </executions>
-          <dependencies>
-            <dependency>
-              <groupId>org.robolectric</groupId>
-              <artifactId>robolectric-processor</artifactId>
-              <version>${project.version}</version>
-            </dependency>
-          </dependencies>
-        </plugin>
-      
-        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.13</version>
           <configuration>
-            <excludes>
-              <exclude>**/Test*.java</exclude>
-            </excludes>
+            <includes>
+              <include>**/*Test.java</include>
+            </includes>
             <argLine>-Xms512m -Xmx1024m -XX:MaxPermSize=256m</argLine>
+            <runOrder>random</runOrder>
           </configuration>
         </plugin>
 
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>2.2</version>
           <configuration>
@@ -147,7 +215,6 @@
           </executions>
         </plugin>
 
-        <!-- required for testing robolectric-sqlite -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
@@ -162,24 +229,7 @@
         </plugin>
 
         <plugin>
-          <groupId>com.googlecode.mavennatives</groupId>
-          <artifactId>maven-nativedependencies-plugin</artifactId>
-          <version>0.0.7</version>
-          <executions>
-            <execution>
-                  <id>unpacknatives</id>
-                  <phase>generate-resources</phase>
-                  <goals>
-                      <goal>copy</goal>
-                  </goals>
-              </execution>
-          </executions>
-          <configuration>
-              <separateDirs>true</separateDirs>
-          </configuration>
-        </plugin>
-
-        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
           <version>2.4.1</version>
           <configuration>
@@ -193,10 +243,24 @@
             </filesets>
           </configuration>
         </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>2.4</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
-  
+
   <scm>
     <url>git@github.com:robolectric/robolectric.git</url>
     <connection>scm:git:git://github.com/robolectric/robolectric.git</connection>
@@ -220,6 +284,7 @@
       </roles>
       <timezone>PST/PDT</timezone>
     </developer>
+
     <developer>
       <id>tyler</id>
       <name>Tyler Schultz</name>
@@ -231,6 +296,7 @@
       </roles>
       <timezone>PST/PDT</timezone>
     </developer>
+
     <developer>
       <id>phil</id>
       <name>Phil Goodwin</name>

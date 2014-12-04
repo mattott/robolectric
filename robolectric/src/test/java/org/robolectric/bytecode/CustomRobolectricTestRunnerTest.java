@@ -8,21 +8,18 @@ import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.model.InitializationError;
-import org.robolectric.AndroidManifest;
-import org.robolectric.DefaultTestLifecycle;
-import org.robolectric.Robolectric;
-import org.robolectric.TestRunners;
+import org.robolectric.*;
 import org.robolectric.annotation.Config;
 import org.robolectric.internal.ParallelUniverseInterface;
-import org.robolectric.TestLifecycle;
+import org.robolectric.manifest.AndroidManifest;
 import org.robolectric.res.ResourceLoader;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.fail;
-import static org.fest.reflect.core.Reflection.field;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -47,8 +44,8 @@ public class CustomRobolectricTestRunnerTest {
   @Ignore("should only be run by custom test runner")
   public static class TestApplicationIsInitialized {
     @Test public void shouldPass() throws Exception {
-      assertNotNull(Robolectric.application);
-      assertEquals(CustomApplication.class, Robolectric.application.getClass());
+      assertNotNull(RuntimeEnvironment.application);
+      assertEquals(CustomApplication.class, RuntimeEnvironment.application.getClass());
     }
   }
 
@@ -97,7 +94,9 @@ public class CustomRobolectricTestRunnerTest {
     MyTestRunner testRunner = new MyTestRunner(TestBeforeAndAfter.class);
     testRunner.run(new MyRunNotifier(result));
     assertThat(testRunner.afterTestCalled).isTrue();
-    assertThat(field("terminated").ofType(boolean.class).in(testRunner.application).get()).isTrue();
+    Field terminated = testRunner.application.getClass().getDeclaredField("terminated");
+    terminated.setAccessible(true);
+    assertThat((boolean) (Boolean) (terminated.get(testRunner.application))).isTrue();
   }
 
   public static class MyApplication extends Application {
@@ -128,8 +127,8 @@ public class CustomRobolectricTestRunnerTest {
     }
 
     @Override
-    protected void setUpApplicationState(Method method, ParallelUniverseInterface parallelUniverseInterface, boolean strictI18n, ResourceLoader systemResourceLoader, AndroidManifest appManifest, Config config) {
-      super.setUpApplicationState(method, parallelUniverseInterface, strictI18n, systemResourceLoader, appManifest, config);
+    protected void setUpApplicationState(Method method, ParallelUniverseInterface parallelUniverseInterface, ResourceLoader systemResourceLoader, AndroidManifest appManifest, Config config) {
+      super.setUpApplicationState(method, parallelUniverseInterface, systemResourceLoader, appManifest, config);
       this.application = parallelUniverseInterface.getCurrentApplication();
     }
 

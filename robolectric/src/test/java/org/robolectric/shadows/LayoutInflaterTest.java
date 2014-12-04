@@ -6,9 +6,6 @@ import android.content.pm.ActivityInfo;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +19,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import com.google.android.maps.MapView;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -37,7 +33,7 @@ import org.robolectric.util.CustomView;
 import org.robolectric.util.CustomView2;
 import org.robolectric.util.TestUtil;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -45,7 +41,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.robolectric.Robolectric.buildActivity;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.Shadows.shadowOf;
 import static org.robolectric.test.Assertions.assertThat;
 import static org.robolectric.util.TestUtil.TEST_PACKAGE;
 import static org.robolectric.util.TestUtil.assertInstanceOf;
@@ -304,25 +300,8 @@ public class LayoutInflaterTest {
   }
 
   @Test
-  public void testMapView() throws Exception {
-    RelativeLayout mainView = (RelativeLayout) inflate("mapview");
-    assertThat(mainView.findViewById(R.id.map_view)).isInstanceOf(MapView.class);
-  }
-
-  @Test @Ignore("should this work?")
-  public void testFragment() throws Exception {
-    FragmentActivity fragmentActivity = new FragmentActivity();
-    context = fragmentActivity;
-    View v = inflate("fragment");
-    TestUtil.assertInstanceOf(TextView.class, v);
-    final FragmentManager fragmentManager = fragmentActivity.getSupportFragmentManager();
-    Fragment fragment = fragmentManager.findFragmentById(R.id.my_fragment);
-    assertNotNull(fragment);
-  }
-
-  @Test
   public void testMultiOrientation() throws Exception {
-    context = buildActivity(FragmentActivity.class).create().start().resume().get();
+    context = buildActivity(Activity.class).create().start().resume().get();
 
     // Default screen orientation should be portrait.
     ViewGroup view = (ViewGroup) inflate("multi_orientation");
@@ -492,7 +471,7 @@ public class LayoutInflaterTest {
     return drawable;
   }
 
-  public static class ClickActivity extends FragmentActivity {
+  public static class ClickActivity extends Activity {
     public boolean clicked = false;
 
     @Override protected void onCreate(Bundle savedInstanceState) {

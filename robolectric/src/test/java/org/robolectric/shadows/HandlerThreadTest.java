@@ -6,10 +6,11 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
 import static org.junit.Assert.*;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class HandlerThreadTest {
@@ -30,7 +31,7 @@ public class HandlerThreadTest {
     handlerThread = new HandlerThread("test");
     handlerThread.start();
     assertNotNull(handlerThread.getLooper());
-    assertNotSame(handlerThread.getLooper(), Robolectric.application.getMainLooper());
+    assertNotSame(handlerThread.getLooper(), RuntimeEnvironment.application.getMainLooper());
   }
 
   @Test

@@ -6,13 +6,13 @@ import android.view.MenuItem;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 import org.robolectric.shadows.ShadowActivity;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class MenuTest {
@@ -60,7 +60,7 @@ public class MenuTest {
 
     Assert.assertNotNull(testMenuItem);
 
-    ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
+    ShadowActivity shadowActivity = Shadows.shadowOf(activity);
     Intent startedIntent = shadowActivity.getNextStartedActivity();
     assertNotNull(startedIntent);
   }

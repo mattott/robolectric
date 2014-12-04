@@ -13,16 +13,17 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.R;
-import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.data.MapEntry.entry;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.robolectric.Robolectric.application;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.RuntimeEnvironment.application;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class ImageViewTest {
@@ -30,10 +31,9 @@ public class ImageViewTest {
 
   @Before
   public void setUp() throws Exception {
-    Resources resources = Robolectric.application.getResources();
-    Bitmap bitmap = BitmapFactory.decodeResource(resources,
-        R.drawable.an_image);
-    imageView = new ImageView(Robolectric.application);
+    Resources resources = RuntimeEnvironment.application.getResources();
+    Bitmap bitmap = BitmapFactory.decodeResource(resources, R.drawable.an_image);
+    imageView = new ImageView(RuntimeEnvironment.application);
     imageView.setImageBitmap(bitmap);
   }
 
@@ -56,7 +56,7 @@ public class ImageViewTest {
 
   @Test
   public void visualizeWithEmpty() throws Exception {
-    assertEquals("", Robolectric.visualize(new ImageView(application)));
+    assertEquals("", ShadowView.visualize(new ImageView(application)));
   }
 
   @Test
@@ -108,7 +108,7 @@ public class ImageViewTest {
   @Test
   public void testCallingLayoutOnParent(){
     imageView.layout(1,2,3,4);
-    ShadowImageView shadowImageView = Robolectric.shadowOf(imageView);
+    ShadowImageView shadowImageView = Shadows.shadowOf(imageView);
     assertTrue(shadowImageView.onLayoutWasCalled());
   }
 

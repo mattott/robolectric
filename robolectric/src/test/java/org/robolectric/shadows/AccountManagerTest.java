@@ -2,6 +2,7 @@ package org.robolectric.shadows;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorDescription;
 import android.accounts.AuthenticatorException;
@@ -9,18 +10,32 @@ import android.accounts.OnAccountsUpdateListener;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.os.Bundle;
-
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
 import java.io.IOException;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.fail;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class AccountManagerTest {
@@ -29,7 +44,7 @@ public class AccountManagerTest {
 
   @Before
   public void setUp() throws Exception {
-    app = Robolectric.application;
+    app = RuntimeEnvironment.application;
     am = AccountManager.get(app);
   }
 
@@ -49,13 +64,13 @@ public class AccountManagerTest {
     assertThat(am.getAccounts().length).isEqualTo(0);
 
     Account a1 = new Account("name_a", "type_a");
-    Robolectric.shadowOf(am).addAccount(a1);
+    shadowOf(am).addAccount(a1);
     assertThat(am.getAccounts()).isNotNull();
     assertThat(am.getAccounts().length).isEqualTo(1);
     assertThat(am.getAccounts()[0]).isSameAs(a1);
 
     Account a2 = new Account("name_b", "type_b");
-    Robolectric.shadowOf(am).addAccount(a2);
+    shadowOf(am).addAccount(a2);
     assertThat(am.getAccounts()).isNotNull();
     assertThat(am.getAccounts().length).isEqualTo(2);
     assertThat(am.getAccounts()[1]).isSameAs(a2);
@@ -67,21 +82,21 @@ public class AccountManagerTest {
     assertThat(am.getAccounts().length).isEqualTo(0);
 
     Account a1 = new Account("name_a", "type_a");
-    Robolectric.shadowOf(am).addAccount(a1);
+    shadowOf(am).addAccount(a1);
     Account[] accounts = am.getAccountsByType("type_a");
     assertThat(accounts).isNotNull();
     assertThat(accounts.length).isEqualTo(1);
     assertThat(accounts[0]).isSameAs(a1);
 
     Account a2 = new Account("name_b", "type_b");
-    Robolectric.shadowOf(am).addAccount(a2);
+    shadowOf(am).addAccount(a2);
     accounts = am.getAccountsByType("type_a");
     assertThat(accounts).isNotNull();
     assertThat(accounts.length).isEqualTo(1);
     assertThat(accounts[0]).isSameAs(a1);
 
     Account a3 = new Account("name_c", "type_a");
-    Robolectric.shadowOf(am).addAccount(a3);
+    shadowOf(am).addAccount(a3);
     accounts = am.getAccountsByType("type_a");
     assertThat(accounts).isNotNull();
     assertThat(accounts.length).isEqualTo(2);
@@ -92,7 +107,7 @@ public class AccountManagerTest {
   @Test
   public void addAuthToken() {
     Account account = new Account("name", "type");
-    Robolectric.shadowOf(am).addAccount(account);
+    shadowOf(am).addAccount(account);
 
     am.setAuthToken(account, "token_type_1", "token1");
     am.setAuthToken(account, "token_type_2", "token2");
@@ -163,7 +178,7 @@ public class AccountManagerTest {
     boolean accountAdded = am.addAccountExplicitly(account, null, null);
 
     assertThat(accountAdded).isTrue();
-    
+
     am.setUserData(account, "key123", "value123");
     assertThat(am.getUserData(account, "key123")).isEqualTo("value123");
   }
@@ -174,7 +189,7 @@ public class AccountManagerTest {
     boolean accountAdded = am.addAccountExplicitly(account, null, null);
 
     assertThat(accountAdded).isTrue();
-    
+
     am.setUserData(account, "key123", "value123");
     assertThat(am.getUserData(account, "key123")).isEqualTo("value123");
 
@@ -188,14 +203,14 @@ public class AccountManagerTest {
     boolean accountAdded = am.addAccountExplicitly(account, null, null);
 
     assertThat(accountAdded).isTrue();
-    
+
     am.setUserData(account, "key123", "value123");
     assertThat(am.getUserData(account, "key123")).isEqualTo("value123");
 
     am.setUserData(account, "key123", null);
     assertThat(am.getUserData(account, "key123")).isNull();
   }
-  
+
   @Test
   public void testGetSetPassword_setInAccountInitiallyWithNoPassword() {
     Account account = new Account("name", "type");
@@ -203,9 +218,9 @@ public class AccountManagerTest {
 
     assertThat(accountAdded).isTrue();
     assertThat(am.getPassword(account)).isNull();
-    
+
     am.setPassword(account, "passwd");
-    assertThat(am.getPassword(account)).isEqualTo("passwd");	  
+    assertThat(am.getPassword(account)).isEqualTo("passwd");
   }
 
   @Test
@@ -214,10 +229,10 @@ public class AccountManagerTest {
     boolean accountAdded = am.addAccountExplicitly(account, "passwd1", null);
 
     assertThat(accountAdded).isTrue();
-    assertThat(am.getPassword(account)).isEqualTo("passwd1");	  
+    assertThat(am.getPassword(account)).isEqualTo("passwd1");
 
     am.setPassword(account, "passwd2");
-    assertThat(am.getPassword(account)).isEqualTo("passwd2");	  
+    assertThat(am.getPassword(account)).isEqualTo("passwd2");
   }
 
   @Test
@@ -226,16 +241,16 @@ public class AccountManagerTest {
     boolean accountAdded = am.addAccountExplicitly(account, "passwd1", null);
 
     assertThat(accountAdded).isTrue();
-    assertThat(am.getPassword(account)).isEqualTo("passwd1");	  
+    assertThat(am.getPassword(account)).isEqualTo("passwd1");
 
     am.setPassword(account, null);
-    assertThat(am.getPassword(account)).isNull();	  
+    assertThat(am.getPassword(account)).isNull();
   }
 
   @Test
   public void testBlockingGetAuthToken() throws AuthenticatorException, OperationCanceledException, IOException {
     Account account = new Account("name", "type");
-    Robolectric.shadowOf(am).addAccount(account);
+    shadowOf(am).addAccount(account);
 
     am.setAuthToken(account, "token_type_1", "token1");
     am.setAuthToken(account, "token_type_2", "token2");
@@ -263,7 +278,7 @@ public class AccountManagerTest {
   @Test
   public void removeAccount_throwsIllegalArgumentException_whenPassedNullAccount() {
     Account account = new Account("name", "type");
-    Robolectric.shadowOf(am).addAccount(account);
+    shadowOf(am).addAccount(account);
 
     try {
       am.removeAccount(null, null, null);
@@ -276,7 +291,7 @@ public class AccountManagerTest {
   @Test
   public void removeAccount_doesNotRemoveAccountOfDifferentName() throws Exception {
     Account account = new Account("name", "type");
-    Robolectric.shadowOf(am).addAccount(account);
+    shadowOf(am).addAccount(account);
 
     Account wrongAccount = new Account("wrong_name", "type");
     AccountManagerFuture<Boolean> future = am.removeAccount(wrongAccount, null, null);
@@ -287,7 +302,7 @@ public class AccountManagerTest {
   @Test
   public void removeAccount_does() throws Exception {
     Account account = new Account("name", "type");
-    Robolectric.shadowOf(am).addAccount(account);
+    shadowOf(am).addAccount(account);
 
     AccountManagerFuture<Boolean> future = am.removeAccount(account, null, null);
     assertThat(future.getResult()).isTrue();
@@ -314,7 +329,7 @@ public class AccountManagerTest {
     assertThat(listener.getInvocationCount()).isEqualTo(0);
 
     Account account = new Account("name", "type");
-    Robolectric.shadowOf(am).addAccount(account);
+    shadowOf(am).addAccount(account);
     assertThat(listener.getInvocationCount()).isEqualTo(1);
   }
 
@@ -326,7 +341,7 @@ public class AccountManagerTest {
     assertThat(listener.getInvocationCount()).isEqualTo(0);
 
     Account account = new Account("name", "type");
-    Robolectric.shadowOf(am).addAccount(account);
+    shadowOf(am).addAccount(account);
     assertThat(listener.getInvocationCount()).isEqualTo(1);
   }
 
@@ -339,7 +354,7 @@ public class AccountManagerTest {
 
   @Test
   public void testAddAuthenticator() {
-    Robolectric.shadowOf(am).addAuthenticator("type");
+    shadowOf(am).addAuthenticator("type");
     AuthenticatorDescription[] result = am.getAuthenticatorTypes();
     assertThat(result.length).isEqualTo(1);
     assertThat(result[0].type).isEqualTo("type");
@@ -353,17 +368,17 @@ public class AccountManagerTest {
   @Test
   public void invalidateAuthToken_noToken() {
     Account account1 = new Account("name", "type1");
-    Robolectric.shadowOf(am).addAccount(account1);
+    shadowOf(am).addAccount(account1);
     am.invalidateAuthToken("type1", "token1");
   }
 
   @Test
   public void invalidateAuthToken_multipleAccounts() {
     Account account1 = new Account("name", "type1");
-    Robolectric.shadowOf(am).addAccount(account1);
+    shadowOf(am).addAccount(account1);
 
     Account account2 = new Account("name", "type2");
-    Robolectric.shadowOf(am).addAccount(account2);
+    shadowOf(am).addAccount(account2);
 
     am.setAuthToken(account1, "token_type_1", "token1");
     am.setAuthToken(account2, "token_type_1", "token1");
@@ -385,7 +400,7 @@ public class AccountManagerTest {
   @Test
   public void invalidateAuthToken_multipleTokens() {
     Account account = new Account("name", "type1");
-    Robolectric.shadowOf(am).addAccount(account);
+    shadowOf(am).addAccount(account);
 
     am.setAuthToken(account, "token_type_1", "token1");
     am.setAuthToken(account, "token_type_2", "token2");
@@ -407,7 +422,7 @@ public class AccountManagerTest {
   @Test
   public void invalidateAuthToken_multipleTokenTypesSameToken() {
     Account account = new Account("name", "type1");
-    Robolectric.shadowOf(am).addAccount(account);
+    shadowOf(am).addAccount(account);
 
     am.setAuthToken(account, "token_type_1", "token1");
     am.setAuthToken(account, "token_type_2", "token1");
@@ -423,7 +438,7 @@ public class AccountManagerTest {
 
   @Test
   public void addAccount_noActivitySpecified() throws Exception {
-    Robolectric.shadowOf(am).addAuthenticator("google.com");
+    shadowOf(am).addAuthenticator("google.com");
 
     AccountManagerFuture<Bundle> result = am.addAccount("google.com", "auth_token_type", null, null, null, null, null);
 
@@ -434,10 +449,38 @@ public class AccountManagerTest {
 
   @Test
   public void addAccount_activitySpecified() throws Exception {
-    Robolectric.shadowOf(am).addAuthenticator("google.com");
+    shadowOf(am).addAuthenticator("google.com");
 
     AccountManagerFuture<Bundle> result = am.addAccount("google.com", "auth_token_type", null, null, new Activity(), null, null);
 
+    Bundle resultBundle = result.getResult();
+
+    assertThat(resultBundle.getString(AccountManager.KEY_ACCOUNT_TYPE)).isEqualTo("google.com");
+    assertThat(resultBundle.getString(AccountManager.KEY_ACCOUNT_NAME)).isNotNull();
+  }
+
+  @Test
+  public void addAccount_shouldCallCallback() throws Exception {
+    shadowOf(am).addAuthenticator("google.com");
+
+    AccountManagerCallback<Bundle> callback = mock(AccountManagerCallback.class);
+    AccountManagerFuture<Bundle> result = am.addAccount("google.com", "auth_token_type", null, null, new Activity(), callback, null);
+    verify(callback, never()).run(any(AccountManagerFuture.class));
+    assertFalse(result.isDone());
+    shadowOf(am).addAccount(new Account("thebomb@google.com", "google.com"));
+    assertTrue(result.isDone());
+    AccountManagerFutureMatcher<Bundle> matcher = new AccountManagerFutureMatcher<Bundle>(new BaseMatcher<Bundle>() {
+      @Override
+      public boolean matches(Object o) {
+        return "thebomb@google.com".equals(((Bundle) o).getString(AccountManager.KEY_ACCOUNT_NAME));
+      }
+
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("Expected thebomb@google.com");
+      }
+    });
+    verify(callback).run(argThat(allOf(matcher, sameInstance(result))));
     Bundle resultBundle = result.getResult();
 
     assertThat(resultBundle.getString(AccountManager.KEY_ACCOUNT_TYPE)).isEqualTo("google.com");
@@ -451,6 +494,35 @@ public class AccountManagerTest {
       fail("addAccount() should throw an authenticator exception if no authenticator was registered for this account type");
     } catch(AuthenticatorException e) {
       // Expected
+    }
+  }
+
+  @Test
+  public void testGetAsSystemService() throws Exception {
+    AccountManager systemService = (AccountManager) app.getSystemService(Context.ACCOUNT_SERVICE);
+    assertThat(systemService).isNotNull();
+    assertThat(am).isEqualTo(systemService);
+  }
+
+  private static class AccountManagerFutureMatcher<T> extends BaseMatcher<AccountManagerFuture<T>> {
+
+    private final Matcher<T> matcher;
+
+    AccountManagerFutureMatcher(Matcher<T> matcher) { this.matcher = matcher; }
+
+    @Override
+    public boolean matches(Object o) {
+      try {
+        return matcher.matches(((AccountManagerFuture) o).getResult());
+      } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+      }
+    }
+
+    @Override
+    public void describeTo(Description description) {
+      matcher.describeTo(description);
     }
   }
 }

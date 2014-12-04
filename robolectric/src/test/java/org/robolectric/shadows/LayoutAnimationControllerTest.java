@@ -5,9 +5,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class LayoutAnimationControllerTest {
@@ -15,8 +17,8 @@ public class LayoutAnimationControllerTest {
 
   @Before
   public void setup() {
-    LayoutAnimationController controller = new LayoutAnimationController(Robolectric.application, null);
-    shadow = Robolectric.shadowOf(controller);
+    LayoutAnimationController controller = new LayoutAnimationController(RuntimeEnvironment.application, null);
+    shadow = Shadows.shadowOf(controller);
   }
 
   @Test

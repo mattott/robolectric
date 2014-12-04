@@ -9,16 +9,17 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 
 import java.util.concurrent.Callable;
 
 import static junit.framework.Assert.assertNull;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class ProgressDialogTest {
@@ -28,8 +29,8 @@ public class ProgressDialogTest {
 
   @Before
   public void setUp() {
-    dialog = new ProgressDialog(Robolectric.application);
-    shadow = Robolectric.shadowOf(dialog);
+    dialog = new ProgressDialog(RuntimeEnvironment.application);
+    shadow = Shadows.shadowOf(dialog);
   }
 
   @Test
@@ -95,7 +96,7 @@ public class ProgressDialogTest {
     assertLatestDialogsSet("Title", "Message", false, false, null, new Callable<ProgressDialog>() {
       @Override
       public ProgressDialog call() throws Exception {
-        return ProgressDialog.show(Robolectric.application, "Title", "Message");
+        return ProgressDialog.show(RuntimeEnvironment.application, "Title", "Message");
       }
     }
     );
@@ -106,7 +107,7 @@ public class ProgressDialogTest {
     assertLatestDialogsSet("Title", "Message", true, false, null, new Callable<ProgressDialog>() {
       @Override
       public ProgressDialog call() throws Exception {
-        return ProgressDialog.show(Robolectric.application, "Title", "Message", true);
+        return ProgressDialog.show(RuntimeEnvironment.application, "Title", "Message", true);
       }
     });
   }
@@ -116,7 +117,7 @@ public class ProgressDialogTest {
     assertLatestDialogsSet("Title", "Message", true, true, null, new Callable<ProgressDialog>() {
       @Override
       public ProgressDialog call() throws Exception {
-        return ProgressDialog.show(Robolectric.application, "Title", "Message", true, true);
+        return ProgressDialog.show(RuntimeEnvironment.application, "Title", "Message", true, true);
       }
     });
   }
@@ -132,7 +133,7 @@ public class ProgressDialogTest {
     assertLatestDialogsSet("Title", "Message", true, true, cancelListener, new Callable<ProgressDialog>() {
       @Override
       public ProgressDialog call() throws Exception {
-        return ProgressDialog.show(Robolectric.application, "Title", "Message", true, true, cancelListener);
+        return ProgressDialog.show(RuntimeEnvironment.application, "Title", "Message", true, true, cancelListener);
       }
     });
   }

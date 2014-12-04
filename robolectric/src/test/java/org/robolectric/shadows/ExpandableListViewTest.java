@@ -9,6 +9,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 import org.robolectric.util.Transcript;
 
@@ -17,8 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class ExpandableListViewTest {
@@ -29,7 +30,7 @@ public class ExpandableListViewTest {
 
   @Before
   public void setUp() {
-    expandableListView = new ExpandableListView(Robolectric.application);
+    expandableListView = new ExpandableListView(RuntimeEnvironment.application);
     transcript = new Transcript();
     myOnChildClickListener = new MyOnChildClickListener();
   }
@@ -67,7 +68,7 @@ public class ExpandableListViewTest {
     }
 
     return new SimpleExpandableListAdapter(
-        Robolectric.application,
+        RuntimeEnvironment.application,
         groupData,
         R.layout.simple_expandable_list_item_1,
         new String[] {"NAME", "IS_EVEN"},

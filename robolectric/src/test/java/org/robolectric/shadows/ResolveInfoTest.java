@@ -5,9 +5,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class ResolveInfoTest {
@@ -18,7 +19,7 @@ public class ResolveInfoTest {
   @Before
   public void setup() {
     mResolveInfo = ShadowResolveInfo.newResolveInfo("name", "package", "fragmentActivity");
-    mShadowInfo = Robolectric.shadowOf(mResolveInfo);
+    mShadowInfo = Shadows.shadowOf(mResolveInfo);
   }
 
   @Test

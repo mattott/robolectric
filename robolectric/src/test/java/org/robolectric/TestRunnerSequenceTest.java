@@ -8,12 +8,13 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.model.InitializationError;
 import org.robolectric.annotation.Config;
 import org.robolectric.bytecode.Setup;
+import org.robolectric.manifest.AndroidManifest;
 import org.robolectric.res.FsFile;
 import org.robolectric.util.Transcript;
 
 import java.lang.reflect.Method;
 
-import static org.fest.assertions.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assert.assertTrue;
 import static org.robolectric.util.TestUtil.resourceFile;
 
@@ -45,7 +46,7 @@ public class TestRunnerSequenceTest {
   @Test public void whenNoAppManifest_shouldRunThingsInTheRightOrder() throws Exception {
     StateHolder.transcript = new Transcript();
     assertNoFailures(run(new Runner(SimpleTest.class) {
-      @Override protected AndroidManifest createAppManifest(FsFile manifestFile, FsFile resDir, FsFile assetsDir) {
+      @Override protected AndroidManifest createAppManifest(FsFile manifestFile, FsFile resDir, FsFile assetDir) {
         return null;
       }
     }));
@@ -107,7 +108,7 @@ public class TestRunnerSequenceTest {
     }
 
     @Override
-    protected AndroidManifest createAppManifest(FsFile manifestFile, FsFile resDir, FsFile assetsDir) {
+    protected AndroidManifest createAppManifest(FsFile manifestFile, FsFile resDir, FsFile assetDir) {
       return new AndroidManifest(resourceFile("TestAndroidManifest.xml"), resourceFile("res"), resourceFile("assets"));
     }
 

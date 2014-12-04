@@ -6,11 +6,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertSame;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class LinearLayoutTest {
@@ -19,7 +20,7 @@ public class LinearLayoutTest {
 
   @Before
   public void setup() throws Exception {
-    linearLayout = new LinearLayout(Robolectric.application);
+    linearLayout = new LinearLayout(RuntimeEnvironment.application);
     shadow = shadowOf(linearLayout);
   }
 

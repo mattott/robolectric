@@ -7,9 +7,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -22,7 +23,7 @@ public class FrameLayoutTest {
 
   @Before
   public void setUp() throws Exception {
-    frameLayout = new FrameLayout(Robolectric.application);
+    frameLayout = new FrameLayout(RuntimeEnvironment.application);
   }
 
   @Test

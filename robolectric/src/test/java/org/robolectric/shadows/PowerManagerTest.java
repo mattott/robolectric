@@ -7,13 +7,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class PowerManagerTest {
@@ -23,7 +24,7 @@ public class PowerManagerTest {
 
   @Before
   public void before() {
-    powerManager = (PowerManager) Robolectric.application.getSystemService(Context.POWER_SERVICE);
+    powerManager = (PowerManager) RuntimeEnvironment.application.getSystemService(Context.POWER_SERVICE);
     shadowPowerManager = shadowOf(powerManager);
   }
 

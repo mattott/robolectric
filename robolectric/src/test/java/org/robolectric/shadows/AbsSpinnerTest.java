@@ -1,37 +1,32 @@
 package org.robolectric.shadows;
 
-
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Gallery;
 import android.widget.Spinner;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class AbsSpinnerTest {
   private Context context;
-  private AdapterView adapterView;
   private Spinner spinner;
   private ShadowAbsSpinner shadowSpinner;
   private ArrayAdapter<String> arrayAdapter;
 
   @Before
   public void setUp() throws Exception {
-    context = Robolectric.application;
-    adapterView = new Gallery(context);
+    context = RuntimeEnvironment.application;
     spinner = new Spinner(context);
-    shadowSpinner = (ShadowAbsSpinner) shadowOf(spinner);
+    shadowSpinner = shadowOf(spinner);
     String [] testItems = {"foo", "bar"};
     arrayAdapter = new MyArrayAdapter(this.context, testItems);
   }

@@ -2,6 +2,7 @@ package org.robolectric.shadows;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.preference.Preference;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
@@ -9,15 +10,15 @@ import android.util.AttributeSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.TestRunners;
 import org.robolectric.res.Attribute;
 import org.robolectric.util.TestUtil;
 
 import java.util.ArrayList;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.buildActivity;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class PreferenceGroupTest {
@@ -31,10 +32,11 @@ public class PreferenceGroupTest {
   @Before
   public void setUp() throws Exception {
     activity = buildActivity(Activity.class).create().get();
-    attrs = new RoboAttributeSet(new ArrayList<Attribute>(), TestUtil.emptyResources(), null);
+    Resources resources = TestUtil.emptyResources();
+    attrs = new RoboAttributeSet(new ArrayList<Attribute>(), shadowOf(resources).getResourceLoader());
 
     group = new TestPreferenceGroup(activity, attrs);
-    shadow = Robolectric.shadowOf(group);
+    shadow = shadowOf(group);
     shadow.onAttachedToHierarchy(new PreferenceManager(activity, 0));
 
     pref1 = new Preference(activity);
@@ -142,7 +144,7 @@ public class PreferenceGroupTest {
   @Test
   public void shouldFindPreferenceRecursively() {
     TestPreferenceGroup group2 = new TestPreferenceGroup(activity, attrs);
-    Robolectric.shadowOf(group2).onAttachedToHierarchy(new PreferenceManager(activity, 0));
+    shadowOf(group2).onAttachedToHierarchy(new PreferenceManager(activity, 0));
     group2.addPreference(pref2);
 
     group.addPreference(pref1);
@@ -156,7 +158,7 @@ public class PreferenceGroupTest {
     boolean[] values = {false, true};
 
     TestPreferenceGroup group2 = new TestPreferenceGroup(activity, attrs);
-    Robolectric.shadowOf(group2).onAttachedToHierarchy(new PreferenceManager(activity, 0));
+    shadowOf(group2).onAttachedToHierarchy(new PreferenceManager(activity, 0));
     group2.addPreference(pref2);
 
     group.addPreference(pref1);

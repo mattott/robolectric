@@ -5,12 +5,12 @@ import android.content.res.Configuration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 
 import java.util.Locale;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class ConfigurationTest {
@@ -21,7 +21,7 @@ public class ConfigurationTest {
   @Before
   public void setUp() throws Exception {
     configuration = new Configuration();
-    shConfiguration = Robolectric.shadowOf( configuration );
+    shConfiguration = Shadows.shadowOf(configuration);
   }
 
   @Test

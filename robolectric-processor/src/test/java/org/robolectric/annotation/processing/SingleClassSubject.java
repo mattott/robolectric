@@ -3,6 +3,8 @@ package org.robolectric.annotation.processing;
 import static com.google.testing.compile.JavaFileObjects.forResource;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 import static org.robolectric.annotation.processing.Utils.toResourcePath;
+import static org.robolectric.annotation.processing.Utils.ROBO_SOURCE;
+import static org.robolectric.annotation.processing.Utils.SHADOW_EXTRACTOR_SOURCE;
 import static org.truth0.Truth.ASSERT;
 
 import javax.tools.JavaFileObject;
@@ -18,9 +20,6 @@ import com.google.testing.compile.CompileTester.SuccessfulCompilationClause;
 import com.google.testing.compile.CompileTester.UnsuccessfulCompilationClause;
 
 public final class SingleClassSubject extends Subject<SingleClassSubject, String> {
-  private static final JavaFileObject ROBO_SOURCE            = forResource("mock-source/org/robolectric/Robolectric.java");
-  private static final JavaFileObject ROBO_INTERNALS_SOURCE  = forResource("mock-source/org/robolectric/bytecode/RobolectricInternals.java");
-  private static final JavaFileObject SHADOW_WRANGLER_SOURCE = forResource("mock-source/org/robolectric/bytecode/ShadowWrangler.java");
 
   public static SubjectFactory<SingleClassSubject, String> singleClass() {
 
@@ -41,7 +40,7 @@ public final class SingleClassSubject extends Subject<SingleClassSubject, String
     super(failureStrategy, subject);
     source = forResource(toResourcePath(subject));
     tester = ASSERT.about(javaSources())
-      .that(ImmutableList.of(source, ROBO_SOURCE, ROBO_INTERNALS_SOURCE, SHADOW_WRANGLER_SOURCE))
+      .that(ImmutableList.of(source, ROBO_SOURCE, SHADOW_EXTRACTOR_SOURCE))
       .processedWith(new RoboProcessor());
   }
 

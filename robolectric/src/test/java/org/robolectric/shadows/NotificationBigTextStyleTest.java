@@ -1,8 +1,8 @@
 package org.robolectric.shadows;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.robolectric.Robolectric.application;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.robolectric.RuntimeEnvironment.application;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.app.Notification;
 import android.app.Notification.BigTextStyle;

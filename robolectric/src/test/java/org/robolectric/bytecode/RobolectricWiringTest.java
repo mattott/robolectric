@@ -4,9 +4,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
-import org.robolectric.internal.HiddenApi;
+import org.robolectric.Shadows;
+import org.robolectric.annotation.HiddenApi;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.shadows.ShadowHttpResponseCache;
 import org.robolectric.util.Join;
 
 import java.lang.annotation.Annotation;
@@ -26,17 +28,24 @@ public class RobolectricWiringTest {
 
   @Test
   public void testAllImplementationMethodsHaveCorrectSignature() throws Exception {
-    for (Class<?> shadowClass : Robolectric.DEFAULT_SHADOW_CLASSES) {
-      verifyClass(shadowClass);
+    for (Class<?> shadowClass : Shadows.DEFAULT_SHADOW_CLASSES) {
+      if (!shadowClass.equals(ShadowHttpResponseCache.class)) {
+        verifyClass(shadowClass);
+      }
     }
 
     Assert.assertEquals("@Implementation method mismatch: " + Join.join("\n", mismatches), 0, mismatches.size());
   }
 
+  @SuppressWarnings("deprecation")
   private void verifyClass(final Class<?> shadowClass) {
     Implements annotation = shadowClass.getAnnotation(Implements.class);
-    Class implementedClass = annotation.value();
-    if (implementedClass.getName().equals(Robolectric.Anything.class.getName())) return;
+    Class<?> implementedClass = annotation.value();
+    String implementedClassName = implementedClass.getName();
+
+    if (implementedClassName.equals(void.class.getName())) {
+      return;
+    }
 
     try {
       shadowClass.getConstructor(implementedClass);
@@ -59,7 +68,7 @@ public class RobolectricWiringTest {
     }
   }
 
-  private void verifyMethod(Class implementedClass, Method shadowMethod) {
+  private void verifyMethod(Class<?> implementedClass, Method shadowMethod) {
     Member implementedMember;
 
     boolean isConstructor = shadowMethod.getName().equals("__constructor__");
@@ -109,7 +118,7 @@ public class RobolectricWiringTest {
     }
   }
 
-  private Member findConstructor(Class implementedClass, Method shadowMethod) {
+  private Member findConstructor(Class<?> implementedClass, Method shadowMethod) {
     Class<?>[] parameterTypes = shadowMethod.getParameterTypes();
     try {
       return implementedClass.getConstructor(parameterTypes);
@@ -122,7 +131,7 @@ public class RobolectricWiringTest {
     }
   }
 
-  private Member findMethod(Class implementedClass, Method shadowMethod) {
+  private Member findMethod(Class<?> implementedClass, Method shadowMethod) {
     Class<?>[] parameterTypes = shadowMethod.getParameterTypes();
     String methodName = shadowMethod.getName();
     try {

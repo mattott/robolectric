@@ -8,21 +8,21 @@ import android.widget.Filterable;
 import com.google.android.collect.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
 import java.util.List;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class AutoCompleteTextViewTest {
-  private final AutoCompleteAdapter adapter = new AutoCompleteAdapter(Robolectric.application);
+  private final AutoCompleteAdapter adapter = new AutoCompleteAdapter(RuntimeEnvironment.application);
 
   @Test
   public void shouldInvokeFilter() throws Exception {
-    Robolectric.getUiThreadScheduler().pause();
-    AutoCompleteTextView view = new AutoCompleteTextView(Robolectric.application);
+    ShadowLooper.getUiThreadScheduler().pause();
+    AutoCompleteTextView view = new AutoCompleteTextView(RuntimeEnvironment.application);
     view.setAdapter(adapter);
 
     view.setText("Foo");

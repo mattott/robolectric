@@ -10,16 +10,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.R;
-import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 import org.robolectric.res.Attribute;
-import org.robolectric.util.TestUtil;
+import org.robolectric.res.ResourceLoader;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
+import static org.robolectric.Shadows.*;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class PreferenceTest {
@@ -31,13 +32,15 @@ public class PreferenceTest {
   private RoboAttributeSet attrs;
 
   private boolean clicked = false;
+  private ResourceLoader resourceLoader;
 
   @Before
   public void setup() {
-    context = Robolectric.application;
-    attrs = new RoboAttributeSet(new ArrayList<Attribute>(), TestUtil.emptyResources(), null);
+    context = RuntimeEnvironment.application;
+    resourceLoader = shadowOf(RuntimeEnvironment.application).getResourceLoader();
+    attrs = new RoboAttributeSet(new ArrayList<Attribute>(), resourceLoader);
     preference = new TestPreference(context, attrs);
-    shadow = Robolectric.shadowOf(preference);
+    shadow = shadowOf(preference);
   }
 
   @Test
@@ -46,19 +49,19 @@ public class PreferenceTest {
     int defStyle = R.attr.animalStyle;
 
     preference = new TestPreference(context, attrs, defStyle);
-    shadow = Robolectric.shadowOf(preference);
+    shadow = shadowOf(preference);
     assertThat(shadow.getContext()).isSameAs(context);
     assertThat(shadow.getAttrs()).isSameAs(attrs);
     assertThat(shadow.getDefStyle()).isEqualTo(defStyle);
 
     preference = new TestPreference(context, attrs);
-    shadow = Robolectric.shadowOf(preference);
+    shadow = shadowOf(preference);
     assertThat(shadow.getContext()).isSameAs(context);
     assertThat(shadow.getAttrs()).isSameAs(attrs);
     assertThat(shadow.getDefStyle()).isEqualTo(0);
 
     preference = new TestPreference(context);
-    shadow = Robolectric.shadowOf(preference);
+    shadow = shadowOf(preference);
     assertThat(shadow.getContext()).isSameAs(context);
     assertThat(shadow.getAttrs()).isNull();
     assertThat(shadow.getDefStyle()).isEqualTo(0);
@@ -74,7 +77,7 @@ public class PreferenceTest {
     attributes.add(new Attribute("android:attr/key", key, R.class.getPackage().getName()));
     attributes.add(new Attribute("android:attr/title", title, R.class.getPackage().getName()));
     attributes.add(new Attribute("android:attr/summary", summary, R.class.getPackage().getName()));
-    attrs = new RoboAttributeSet(attributes, TestUtil.emptyResources(), null);
+    attrs = new RoboAttributeSet(attributes, resourceLoader);
 
     preference = new TestPreference(context, attrs);
     assertThat(preference.getKey()).isEqualTo(key);
@@ -87,9 +90,9 @@ public class PreferenceTest {
     String defaultValue = "default_value";
     List<Attribute> attributes = new ArrayList<Attribute>();
     attributes.add(new Attribute("android:attr/defaultValue", defaultValue, R.class.getPackage().getName()));
-    attrs = new RoboAttributeSet(attributes, TestUtil.emptyResources(), null);
+    attrs = new RoboAttributeSet(attributes, resourceLoader);
     preference = new TestPreference(context, attrs);
-    assertThat(Robolectric.shadowOf(preference).getDefaultValue()).isEqualTo(defaultValue);
+    assertThat(shadowOf(preference).getDefaultValue()).isEqualTo(defaultValue);
   }
 
   @Test
@@ -98,7 +101,7 @@ public class PreferenceTest {
     attributes.add(new Attribute("android:attr/key", "@string/preference_resource_key", R.class.getPackage().getName()));
     attributes.add(new Attribute("android:attr/title", "@string/preference_resource_title", R.class.getPackage().getName()));
     attributes.add(new Attribute("android:attr/summary", "@string/preference_resource_summary", R.class.getPackage().getName()));
-    attrs = new RoboAttributeSet(attributes, TestUtil.emptyResources(), null);
+    attrs = new RoboAttributeSet(attributes, resourceLoader);
 
     preference = new TestPreference(context, attrs);
     assertThat(preference.getKey()).isEqualTo("preference_resource_key_value");
@@ -111,9 +114,9 @@ public class PreferenceTest {
     List<Attribute> attributes = new ArrayList<Attribute>();
     attributes.add(new Attribute("android:attr/defaultValue",
         "@string/preference_resource_default_value", R.class.getPackage().getName()));
-    attrs = new RoboAttributeSet(attributes, TestUtil.emptyResources(), null);
+    attrs = new RoboAttributeSet(attributes, resourceLoader);
     preference = new TestPreference(context, attrs);
-    assertThat(Robolectric.shadowOf(preference).getDefaultValue())
+    assertThat(shadowOf(preference).getDefaultValue())
         .isEqualTo("preference_resource_default_value");
   }
 

@@ -13,11 +13,12 @@ import android.os.IBinder;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
+import org.robolectric.internal.Shadow;
 
-import static org.robolectric.Robolectric.*;
-import static org.fest.assertions.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class ServiceTest {
@@ -26,7 +27,7 @@ public class ServiceTest {
   private final Notification.Builder notBuilder = new Notification.Builder(
       service).setSmallIcon(1).setContentTitle("Test")
       .setContentText("Hi there");
-  private final ShadowNotificationManager nm = shadowOf((NotificationManager) Robolectric.application
+  private final ShadowNotificationManager nm = shadowOf((NotificationManager) RuntimeEnvironment.application
       .getSystemService(Context.NOTIFICATION_SERVICE));
 
   @Test(expected = IllegalStateException.class)
@@ -47,14 +48,14 @@ public class ServiceTest {
 
   @Test
   public void shouldUnbindServiceSuccessfully() {
-    ServiceConnection conn = Robolectric.newInstanceOf(MediaScannerConnection.class);
+    ServiceConnection conn = Shadow.newInstanceOf(MediaScannerConnection.class);
     service.unbindService(conn);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldUnbindServiceWithExceptionWhenRequested() {
     shadow.setUnbindServiceShouldThrowIllegalArgument(true);
-    ServiceConnection conn = newInstanceOf(MediaScannerConnection.class);
+    ServiceConnection conn = Shadow.newInstanceOf(MediaScannerConnection.class);
     service.unbindService(conn);
   }
 

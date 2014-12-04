@@ -1,7 +1,6 @@
 package org.robolectric;
 
 import android.os.Build;
-import org.apache.maven.model.Dependency;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +14,7 @@ public class SdkConfig {
     SUPPORTED_APIS.put(Build.VERSION_CODES.JELLY_BEAN, new SdkVersion("4.1.2_r1", "0"));
     SUPPORTED_APIS.put(Build.VERSION_CODES.JELLY_BEAN_MR1, new SdkVersion("4.2.2_r1.2", "0"));
     SUPPORTED_APIS.put(Build.VERSION_CODES.JELLY_BEAN_MR2, new SdkVersion("4.3_r2", "0"));
+    SUPPORTED_APIS.put(Build.VERSION_CODES.KITKAT, new SdkVersion("4.4_r1", "0"));
   }
 
   public SdkConfig(int apiLevel) {
@@ -48,30 +48,21 @@ public class SdkConfig {
     return artifactVersionString.hashCode();
   }
 
-  public Dependency getSystemResourceDependency() {
-    return realAndroidDependency("android-all"); // TODO: remove me?
+  public DependencyJar getSystemResourceDependency() {
+    return createDependency("org.robolectric", "android-all", artifactVersionString, "");
   }
 
-  public Dependency[] getSdkClasspathDependencies() {
-    return new Dependency[] {
-        realAndroidDependency("android-all"),
-        createDependency("org.json", "json", "20080701", "jar", null),
-        createDependency("org.ccil.cowan.tagsoup", "tagsoup", "1.2", "jar", null)
+  public DependencyJar[] getSdkClasspathDependencies() {
+    return new DependencyJar[] {
+        createDependency("org.robolectric", "android-all", artifactVersionString, ""),
+        createDependency("org.robolectric", "shadows-core", "3.0-SNAPSHOT", Integer.toString(apiLevel)),
+        createDependency("org.json", "json", "20080701", ""),
+        createDependency("org.ccil.cowan.tagsoup", "tagsoup", "1.2", "")
     };
   }
 
-  public Dependency realAndroidDependency(String artifactId) {
-    return createDependency("org.robolectric", artifactId, getArtifactVersionString(), "jar", null);
-  }
-
-  public Dependency createDependency(String groupId, String artifactId, String version, String type, String classifier) {
-    Dependency dependency = new Dependency();
-    dependency.setGroupId(groupId);
-    dependency.setArtifactId(artifactId);
-    dependency.setVersion(version);
-    dependency.setType(type);
-    dependency.setClassifier(classifier);
-    return dependency;
+  private DependencyJar createDependency(String groupId, String artifactId, String version, String classifier) {
+    return new DependencyJar(groupId, artifactId, version, classifier);
   }
 
   public static SdkConfig getDefaultSdk() {

@@ -1,35 +1,28 @@
 package org.robolectric.shadows;
 
 import android.app.Activity;
-import android.content.res.ColorStateList;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.content.res.XmlResourceParser;
-import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.NinePatchDrawable;
+import android.content.res.*;
+import android.graphics.drawable.*;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import org.fest.assertions.data.Offset;
+import org.assertj.core.data.Offset;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.R;
-import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 import org.robolectric.annotation.Config;
+import org.robolectric.util.ReflectionHelpers;
 import org.robolectric.util.TestUtil;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.File;
 import java.io.InputStream;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.reflect.core.Reflection.field;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class ResourcesTest {
@@ -88,8 +81,8 @@ public class ResourcesTest {
 
   @Test
   public void getStringArray() throws Exception {
-    assertThat(resources.getStringArray(R.array.items)).isEqualTo(new String[] {"foo", "bar"});
-    assertThat(resources.getStringArray(R.array.greetings)).isEqualTo(new String[] {"hola", "Hello"});
+    assertThat(resources.getStringArray(R.array.items)).isEqualTo(new String[]{"foo", "bar"});
+    assertThat(resources.getStringArray(R.array.greetings)).isEqualTo(new String[]{"hola", "Hello"});
   }
 
   @Test
@@ -109,10 +102,10 @@ public class ResourcesTest {
 
   @Test
   public void getIntArray() throws Exception {
-    assertThat(resources.getIntArray(R.array.empty_int_array)).isEqualTo(new int[] {});
-    assertThat(resources.getIntArray(R.array.zero_to_four_int_array)).isEqualTo(new int[] {0, 1, 2, 3, 4});
-    assertThat(resources.getIntArray(R.array.with_references_int_array)).isEqualTo(new int[] {0, 2000, 1});
-    assertThat(resources.getIntArray(R.array.referenced_colors_int_array)).isEqualTo(new int[] { 0x1, 0xFFFFFFFF, 0xFF000000, 0xFFF5F5F5, 0x802C76AD });
+    assertThat(resources.getIntArray(R.array.empty_int_array)).isEqualTo(new int[]{});
+    assertThat(resources.getIntArray(R.array.zero_to_four_int_array)).isEqualTo(new int[]{0, 1, 2, 3, 4});
+    assertThat(resources.getIntArray(R.array.with_references_int_array)).isEqualTo(new int[]{0, 2000, 1});
+    assertThat(resources.getIntArray(R.array.referenced_colors_int_array)).isEqualTo(new int[]{0x1, 0xFFFFFFFF, 0xFF000000, 0xFFF5F5F5, 0x802C76AD});
   }
 
   @Test
@@ -175,7 +168,8 @@ public class ResourcesTest {
     resources.getIntArray(-1);
   }
 
-  @Test public void getQuantityString() throws Exception {
+  @Test
+  public void getQuantityString() throws Exception {
     assertThat(resources.getQuantityString(R.plurals.beer, 0)).isEqualTo("Howdy");
     assertThat(resources.getQuantityString(R.plurals.beer, 1)).isEqualTo("One beer");
     assertThat(resources.getQuantityString(R.plurals.beer, 2)).isEqualTo("Two beers");
@@ -226,7 +220,8 @@ public class ResourcesTest {
     assertThat(resources.getDrawable(R.anim.animation_list)).isInstanceOf(AnimationDrawable.class);
   }
 
-  @Test @Config(qualifiers = "fr")
+  @Test
+  @Config(qualifiers = "fr")
   public void testGetValuesResFromSpecificQualifiers() {
     assertThat(resources.getString(R.string.hello)).isEqualTo("Bonjour");
   }
@@ -277,7 +272,7 @@ public class ResourcesTest {
    */
   @Test
   public void testGetNinePatchDrawable() {
-    assertThat(Robolectric.getShadowApplication().getResources().getDrawable(R.drawable.nine_patch_drawable)).isInstanceOf(NinePatchDrawable.class);
+    assertThat(ShadowApplication.getInstance().getResources().getDrawable(R.drawable.nine_patch_drawable)).isInstanceOf(NinePatchDrawable.class);
   }
 
   @Test(expected = Resources.NotFoundException.class)
@@ -289,7 +284,7 @@ public class ResourcesTest {
   public void testGetIdentifier() throws Exception {
 
     final String resourceType = "string";
-    final String packageName = Robolectric.application.getPackageName();
+    final String packageName = RuntimeEnvironment.application.getPackageName();
 
     final String resourceName = "hello";
     final int resId1 = resources.getIdentifier(resourceName, resourceType, packageName);
@@ -417,9 +412,9 @@ public class ResourcesTest {
 
     Resources.Theme theme = resources.newTheme();
     theme.applyStyle(R.style.MyBlackTheme, false);
-    int internalId = field("mTheme").ofType(int.class).in(theme).get();
+    int internalId = getInternalId(theme);
 
-    ShadowAssetManager shadow = Robolectric.shadowOf(resources.getAssets());
+    ShadowAssetManager shadow = Shadows.shadowOf(resources.getAssets());
     shadow.getThemeValue(internalId, android.R.attr.windowBackground, out, true);
     assertThat(out.type).isNotEqualTo(TypedValue.TYPE_REFERENCE);
     assertThat(out.type).isGreaterThanOrEqualTo(TypedValue.TYPE_FIRST_COLOR_INT);
@@ -437,19 +432,23 @@ public class ResourcesTest {
 
     Resources.Theme theme = resources.newTheme();
     theme.applyStyle(R.style.MyBlackTheme, false);
-    int internalId = field("mTheme").ofType(int.class).in(theme).get();
+    int internalId = getInternalId(theme);
 
-    ShadowAssetManager shadow = Robolectric.shadowOf(resources.getAssets());
+    ShadowAssetManager shadow = Shadows.shadowOf(resources.getAssets());
     shadow.getThemeValue(internalId, android.R.attr.windowBackground, out, false);
     assertThat(out.type).isEqualTo(TypedValue.TYPE_REFERENCE);
     assertThat(out.resourceId).isEqualTo(android.R.color.black);
+  }
+
+  private int getInternalId(Resources.Theme theme) {
+    return ReflectionHelpers.getFieldReflectively(theme, "mTheme");
   }
 
   @Test
   public void obtainStyledAttributesShouldDereferenceValues() {
     Resources.Theme theme = resources.newTheme();
     theme.applyStyle(R.style.MyBlackTheme, false);
-    TypedArray arr = theme.obtainStyledAttributes(new int[] { android.R.attr.windowBackground });
+    TypedArray arr = theme.obtainStyledAttributes(new int[]{android.R.attr.windowBackground});
     TypedValue value = new TypedValue();
     arr.getValue(0, value);
     arr.recycle();
@@ -459,7 +458,7 @@ public class ResourcesTest {
 
   @Test
   public void subClassInitializedOK() {
-    SubClassResources subClassResources = new SubClassResources(Robolectric.getShadowApplication().getResources());
+    SubClassResources subClassResources = new SubClassResources(ShadowApplication.getInstance().getResources());
     assertThat(subClassResources.openRawResource(R.raw.raw_resource)).isNotNull();
   }
 
@@ -474,7 +473,7 @@ public class ResourcesTest {
   public void applyStyleForced() {
     Resources.Theme theme = resources.newTheme();
     theme.applyStyle(R.style.MyBlackTheme, true);
-    TypedArray arr = theme.obtainStyledAttributes(new int[] { android.R.attr.windowBackground,  android.R.attr.textColorHint });
+    TypedArray arr = theme.obtainStyledAttributes(new int[]{android.R.attr.windowBackground, android.R.attr.textColorHint});
     TypedValue backgroundColor = new TypedValue();
     arr.getValue(0, backgroundColor);
     arr.recycle();
@@ -483,7 +482,7 @@ public class ResourcesTest {
 
     theme.applyStyle(R.style.MyBlueTheme, true);
 
-    arr = theme.obtainStyledAttributes(new int[] { android.R.attr.windowBackground, android.R.attr.textColor,  android.R.attr.textColorHint});
+    arr = theme.obtainStyledAttributes(new int[]{android.R.attr.windowBackground, android.R.attr.textColor, android.R.attr.textColorHint});
     backgroundColor = new TypedValue();
     arr.getValue(0, backgroundColor);
     TypedValue textColor = new TypedValue();
@@ -501,7 +500,7 @@ public class ResourcesTest {
   public void applyStyleNotForced() {
     Resources.Theme theme = resources.newTheme();
     theme.applyStyle(R.style.MyBlackTheme, true);
-    TypedArray arr = theme.obtainStyledAttributes(new int[] { android.R.attr.windowBackground, android.R.attr.textColorHint });
+    TypedArray arr = theme.obtainStyledAttributes(new int[]{android.R.attr.windowBackground, android.R.attr.textColorHint});
     TypedValue backgroundColor = new TypedValue();
     arr.getValue(0, backgroundColor);
     TypedValue textColorHint = new TypedValue();
@@ -514,7 +513,7 @@ public class ResourcesTest {
 
     theme.applyStyle(R.style.MyBlueTheme, false);
 
-    arr = theme.obtainStyledAttributes(new int[] { android.R.attr.windowBackground, android.R.attr.textColor,  android.R.attr.textColorHint});
+    arr = theme.obtainStyledAttributes(new int[]{android.R.attr.windowBackground, android.R.attr.textColor, android.R.attr.textColorHint});
     backgroundColor = new TypedValue();
     arr.getValue(0, backgroundColor);
     TypedValue textColor = new TypedValue();

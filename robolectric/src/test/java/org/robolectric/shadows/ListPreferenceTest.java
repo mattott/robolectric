@@ -7,9 +7,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.R;
 import org.robolectric.Robolectric;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.buildActivity;
 
 @RunWith(TestRunners.WithDefaults.class)
@@ -21,7 +22,7 @@ public class ListPreferenceTest {
   @Before
   public void setUp() throws Exception {
     listPreference = new ListPreference(buildActivity(Activity.class).create().get());
-    shadow = Robolectric.shadowOf(listPreference);
+    shadow = Shadows.shadowOf(listPreference);
   }
 
   @Test

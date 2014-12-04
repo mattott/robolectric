@@ -8,6 +8,7 @@ import android.net.Uri;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
 import java.io.FileDescriptor;
@@ -17,7 +18,7 @@ import java.util.Map;
 import static android.media.MediaMetadataRetriever.METADATA_KEY_ALBUM;
 import static android.media.MediaMetadataRetriever.METADATA_KEY_ARTIST;
 import static android.media.MediaMetadataRetriever.METADATA_KEY_TITLE;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.robolectric.shadows.ShadowMediaMetadataRetriever.addFrame;
 import static org.robolectric.shadows.ShadowMediaMetadataRetriever.addMetadata;
 
@@ -77,7 +78,7 @@ public class MediaMetadataRetrieverTest {
 
   @Test
   public void getFrameAtTime_shouldDependOnTime() {
-    Context context = Robolectric.application;
+    Context context = RuntimeEnvironment.application;
     Uri uri = Uri.parse(path);
     addFrame(context, uri, 12, bitmap);
     addFrame(context, uri, 13, bitmap2);
@@ -90,7 +91,7 @@ public class MediaMetadataRetrieverTest {
 
   @Test
   public void setDataSource_ignoresHeadersWhenShadowed() {
-    Context context = Robolectric.application;
+    Context context = RuntimeEnvironment.application;
     Uri uri = Uri.parse(path);
     Map<String, String> headers = new HashMap<String, String>();
     headers.put("cookie", "nomnomnom");

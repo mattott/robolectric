@@ -4,12 +4,13 @@ import android.widget.RadioGroup;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(TestRunners.WithDefaults.class)
@@ -18,7 +19,7 @@ public class RadioGroupTest {
 
   @Test
   public void checkedRadioButtonId() throws Exception {
-    RadioGroup radioGroup = new RadioGroup(Robolectric.application);
+    RadioGroup radioGroup = new RadioGroup(RuntimeEnvironment.application);
     assertThat(radioGroup.getCheckedRadioButtonId()).isEqualTo(-1);
     radioGroup.check(99);
     assertThat(radioGroup.getCheckedRadioButtonId()).isEqualTo(99);
@@ -26,7 +27,7 @@ public class RadioGroupTest {
 
   @Test
   public void check_shouldCallOnCheckedChangeListener() throws Exception {
-    RadioGroup radioGroup = new RadioGroup(Robolectric.application);
+    RadioGroup radioGroup = new RadioGroup(RuntimeEnvironment.application);
     TestOnCheckedChangeListener listener = new TestOnCheckedChangeListener();
     radioGroup.setOnCheckedChangeListener(listener);
 
@@ -38,7 +39,7 @@ public class RadioGroupTest {
 
   @Test
   public void clearCheck_shouldCallOnCheckedChangeListenerTwice() throws Exception {
-    RadioGroup radioGroup = new RadioGroup(Robolectric.application);
+    RadioGroup radioGroup = new RadioGroup(RuntimeEnvironment.application);
     TestOnCheckedChangeListener listener = new TestOnCheckedChangeListener();
 
     radioGroup.check(BUTTON_ID);

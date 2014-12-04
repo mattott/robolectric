@@ -4,16 +4,16 @@ import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class AbsoluteLayoutTest {
   @Test
   public void getLayoutParams_shouldReturnAbsoluteLayoutParams() throws Exception {
-    ViewGroup.LayoutParams layoutParams = (new AbsoluteLayout(Robolectric.application) {
+    ViewGroup.LayoutParams layoutParams = (new AbsoluteLayout(RuntimeEnvironment.application) {
       @Override protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
         return super.generateDefaultLayoutParams();
       }

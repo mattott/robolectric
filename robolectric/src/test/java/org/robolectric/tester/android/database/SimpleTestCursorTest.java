@@ -6,14 +6,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 import org.robolectric.shadows.ShadowContentResolver;
 
 import java.util.ArrayList;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class SimpleTestCursorTest {
@@ -23,7 +24,7 @@ public class SimpleTestCursorTest {
 
   @Before
   public void setup() throws Exception {
-    contentResolver = Robolectric.application.getContentResolver();
+    contentResolver = RuntimeEnvironment.application.getContentResolver();
     ShadowContentResolver shadowContentResolver = shadowOf(contentResolver);
     uri = Uri.parse("http://foo");
     cursor = new SimpleTestCursor();

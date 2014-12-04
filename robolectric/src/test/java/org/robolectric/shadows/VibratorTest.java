@@ -6,9 +6,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class VibratorTest {
@@ -16,7 +17,7 @@ public class VibratorTest {
 
   @Before
   public void before() {
-    vibrator = (RoboVibrator) Robolectric.application.getSystemService(Context.VIBRATOR_SERVICE);
+    vibrator = (RoboVibrator) RuntimeEnvironment.application.getSystemService(Context.VIBRATOR_SERVICE);
   }
 
   @Test

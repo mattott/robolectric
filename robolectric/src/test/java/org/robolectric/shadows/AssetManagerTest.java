@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 import org.robolectric.util.Strings;
 
@@ -17,7 +19,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 import static org.robolectric.util.TestUtil.joinPath;
 
@@ -38,10 +40,10 @@ public class AssetManagerTest {
   public void assertGetAssetsNotNull() {
     assertNotNull(assetManager);
 
-    assetManager = Robolectric.application.getAssets();
+    assetManager = RuntimeEnvironment.application.getAssets();
     assertNotNull(assetManager);
 
-    assetManager = Robolectric.application.getResources().getAssets();
+    assetManager = RuntimeEnvironment.application.getResources().getAssets();
     assertNotNull(assetManager);
   }
 
@@ -122,7 +124,7 @@ public class AssetManagerTest {
 
   @Test
   public void openNonAssetShouldOpenCorrectAssetBasedOnQualifierMdpi() throws IOException {
-    Robolectric.shadowOf(assetManager).setQualifiers("mdpi");
+    Shadows.shadowOf(assetManager).setQualifiers("mdpi");
 
     InputStream inputStream = assetManager.openNonAsset(0, "./res/drawable/robolectric.png", 0);
 
@@ -132,7 +134,7 @@ public class AssetManagerTest {
 
   @Test
   public void openNonAssetShouldOpenCorrectAssetBasedOnQualifierHdpi() throws IOException {
-    Robolectric.shadowOf(assetManager).setQualifiers("hdpi");
+    Shadows.shadowOf(assetManager).setQualifiers("hdpi");
 
     InputStream inputStream = assetManager.openNonAsset(0, "./res/drawable/robolectric.png", 0);
 

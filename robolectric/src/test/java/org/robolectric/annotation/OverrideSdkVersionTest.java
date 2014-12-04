@@ -3,17 +3,17 @@ package org.robolectric.annotation;
 import android.os.Build;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.AndroidManifest;
-import org.robolectric.Robolectric;
+import org.robolectric.manifest.AndroidManifest;
 import org.robolectric.TestRunners;
+import org.robolectric.shadows.ShadowApplication;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class OverrideSdkVersionTest {
   @Test
   public void whenNotOverridden_shouldUseTargetSdkVersionFromAppManifest() {
-    AndroidManifest appManifest = Robolectric.getShadowApplication().getAppManifest();
+    AndroidManifest appManifest = ShadowApplication.getInstance().getAppManifest();
     assertThat(Build.VERSION.SDK_INT).isEqualTo(appManifest.getTargetSdkVersion());
   }
 

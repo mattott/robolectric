@@ -14,16 +14,17 @@ import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class IntentTest {
@@ -509,7 +510,7 @@ public class IntentTest {
 
   @Test
   public void constructor_shouldSetComponentAndActionAndData() {
-    Intent intent = new Intent("roboaction", Uri.parse("http://www.robolectric.org"), Robolectric.application, Activity.class);
+    Intent intent = new Intent("roboaction", Uri.parse("http://www.robolectric.org"), RuntimeEnvironment.application, Activity.class);
     assertThat(shadowOf(intent).getComponent()).isEqualTo(new ComponentName("org.robolectric", "android.app.Activity"));
     assertThat(shadowOf(intent).getAction()).isEqualTo("roboaction");
     assertThat(shadowOf(intent).getData()).isEqualTo(Uri.parse("http://www.robolectric.org"));

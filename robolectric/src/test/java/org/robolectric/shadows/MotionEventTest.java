@@ -6,9 +6,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class MotionEventTest {
@@ -32,6 +32,7 @@ public class MotionEventTest {
     assertThat(event.getX(1)).isEqualTo(20.0f);
     assertThat(event.getY(1)).isEqualTo(30.0f);
     assertThat(event.getPointerCount()).isEqualTo(2);
+    assertThat(event.getPointerIdBits()).isEqualTo(0x3);
   }
 
   @Test
@@ -40,6 +41,7 @@ public class MotionEventTest {
     shadowMotionEvent.setPointerIds(2, 5);
     assertEquals(2, event.getPointerId(0));
     assertEquals(5, event.getPointerId(1));
+    assertThat(event.getPointerIdBits()).isEqualTo(0x24);
   }
 
   @Test

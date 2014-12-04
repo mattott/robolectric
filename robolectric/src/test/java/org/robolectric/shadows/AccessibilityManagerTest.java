@@ -4,9 +4,9 @@ import org.junit.Test;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
-import static org.robolectric.Robolectric.*;
-import static org.fest.assertions.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.List;
 import com.google.android.collect.Lists;
@@ -14,6 +14,7 @@ import android.content.pm.ServiceInfo;
 import android.view.accessibility.AccessibilityManager;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import static android.content.Context.ACCESSIBILITY_SERVICE;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class AccessibilityManagerTest {
@@ -23,7 +24,7 @@ public class AccessibilityManagerTest {
 
   @Before
   public void setUp() throws Exception {
-    accessibilityManager = (AccessibilityManager) Robolectric.application.getSystemService(ACCESSIBILITY_SERVICE);
+    accessibilityManager = (AccessibilityManager) RuntimeEnvironment.application.getSystemService(ACCESSIBILITY_SERVICE);
     shadowAccessibilityManager = shadowOf(accessibilityManager);
   }
 

@@ -12,12 +12,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.robolectric.Robolectric;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.matchers.JUnitMatchers.hasItem;
 import static org.mockito.Mockito.*;
 
@@ -102,7 +103,7 @@ public class CursorWrapperTest {
   public void getWrappedCursor() {
     Cursor mockCursor = mock(Cursor.class);
     CursorWrapper cursorWrapper = new CursorWrapper(mockCursor);
-    ShadowCursorWrapper shadow = Robolectric.shadowOf(cursorWrapper);
+    ShadowCursorWrapper shadow = Shadows.shadowOf(cursorWrapper);
 
     assertThat(shadow.getWrappedCursor()).isSameAs(mockCursor);
   }

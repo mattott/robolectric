@@ -11,11 +11,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Fail.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Fail.fail;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class CameraTest {
@@ -26,7 +26,7 @@ public class CameraTest {
   @Before
   public void setUp() throws Exception {
     camera = Camera.open();
-    shadowCamera = Robolectric.shadowOf(camera);
+    shadowCamera = Shadows.shadowOf(camera);
   }
 
   @After

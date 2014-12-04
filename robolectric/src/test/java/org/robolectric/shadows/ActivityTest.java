@@ -28,15 +28,13 @@ import android.widget.TextView;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.AndroidManifest;
-import org.robolectric.DefaultTestLifecycle;
-import org.robolectric.R;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.*;
 import org.robolectric.annotation.Config;
+import org.robolectric.manifest.AndroidManifest;
 import org.robolectric.res.Fs;
 import org.robolectric.test.TemporaryFolder;
 import org.robolectric.util.ActivityController;
+import org.robolectric.internal.Shadow;
 import org.robolectric.util.TestRunnable;
 import org.robolectric.util.Transcript;
 
@@ -44,7 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -53,9 +51,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.robolectric.Robolectric.application;
+import static org.robolectric.RuntimeEnvironment.application;
 import static org.robolectric.Robolectric.buildActivity;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = "src/test/resources/TestAndroidManifest.xml")
@@ -179,7 +177,7 @@ public class ActivityTest {
   @Test
   public void shouldSupportStartActivityForResult() throws Exception {
     activity = create(DialogLifeCycleActivity.class);
-    ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
+    ShadowActivity shadowActivity = shadowOf(activity);
     Intent intent = new Intent().setClass(activity, DialogLifeCycleActivity.class);
     assertThat(shadowActivity.getNextStartedActivity()).isNull();
 
@@ -191,9 +189,9 @@ public class ActivityTest {
   }
 
   @Test
-  public void shouldSupportGetStartedActitivitesForResult() throws Exception {
+  public void shouldSupportGetStartedActivitiesForResult() throws Exception {
     activity = create(DialogLifeCycleActivity.class);
-    ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
+    ShadowActivity shadowActivity = shadowOf(activity);
     Intent intent = new Intent().setClass(activity, DialogLifeCycleActivity.class);
 
     activity.startActivityForResult(intent, 142);
@@ -207,9 +205,9 @@ public class ActivityTest {
   }
 
   @Test
-  public void shouldSupportPeekStartedActitivitesForResult() throws Exception {
+  public void shouldSupportPeekStartedActivitiesForResult() throws Exception {
     activity = create(DialogLifeCycleActivity.class);
-    ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
+    ShadowActivity shadowActivity = shadowOf(activity);
     Intent intent = new Intent().setClass(activity, DialogLifeCycleActivity.class);
 
     activity.startActivityForResult(intent, 142);
@@ -234,7 +232,7 @@ public class ActivityTest {
   @Test
   public void shouldRetrievePackageNameFromTheManifest() throws Exception {
     AndroidManifest appManifest = newConfigWith("com.wacka.wa", "");
-    Robolectric.application = new DefaultTestLifecycle().createApplication(null, appManifest, null);
+    RuntimeEnvironment.application = new DefaultTestLifecycle().createApplication(null, appManifest, null);
     shadowOf(application).bind(appManifest, null);
 
     assertThat("com.wacka.wa").isEqualTo(new Activity().getPackageName());
@@ -250,14 +248,14 @@ public class ActivityTest {
 
   @Test
   public void shouldQueueUiTasksWhenUiThreadIsPaused() throws Exception {
-    Robolectric.pauseMainLooper();
+    ShadowLooper.pauseMainLooper();
 
     activity = create(DialogLifeCycleActivity.class);
     TestRunnable runnable = new TestRunnable();
     activity.runOnUiThread(runnable);
     assertFalse(runnable.wasRun);
 
-    Robolectric.unPauseMainLooper();
+    ShadowLooper.unPauseMainLooper();
     assertTrue(runnable.wasRun);
   }
 
@@ -348,7 +346,7 @@ public class ActivityTest {
     Dialog firstDialog = ShadowDialog.getLatestDialog();
 
     activity.removeDialog(1);
-    assertNull(Robolectric.shadowOf(activity).getDialogById(1));
+    assertNull(shadowOf(activity).getDialogById(1));
 
     activity.showDialog(1);
     Dialog secondDialog = ShadowDialog.getLatestDialog();
@@ -551,7 +549,7 @@ public class ActivityTest {
     assertThat(shadow.getManagedCursors()).isNotNull();
     assertThat(shadow.getManagedCursors().size()).isEqualTo(0);
 
-    Cursor c = Robolectric.newInstanceOf(SQLiteCursor.class);
+    Cursor c = Shadow.newInstanceOf(SQLiteCursor.class);
     activity.startManagingCursor(c);
 
     assertThat(shadow.getManagedCursors()).isNotNull();
@@ -778,7 +776,7 @@ public class ActivityTest {
   /////////////////////////////
 
   private void destroy(Activity activity) {
-    new ActivityController(activity).destroy();
+    new ActivityController(new CoreShadowsAdapter(), activity).destroy();
   }
 
   private <T extends Activity> T create(Class<T> activityClass) {

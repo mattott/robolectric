@@ -12,13 +12,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class WebViewTest {
@@ -28,8 +30,8 @@ public class WebViewTest {
 
   @Before
   public void setUp() throws Exception {
-    webView = new WebView(Robolectric.application);
-    shadowWebView = Robolectric.shadowOf(webView);
+    webView = new WebView(RuntimeEnvironment.application);
+    shadowWebView = Shadows.shadowOf(webView);
   }
 
   @Test

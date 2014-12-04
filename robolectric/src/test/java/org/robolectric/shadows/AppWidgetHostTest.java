@@ -8,11 +8,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestRunners;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
-import static org.robolectric.Robolectric.shadowOf;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class AppWidgetHostTest {
@@ -22,7 +23,7 @@ public class AppWidgetHostTest {
 
   @Before
   public void setup() throws Exception {
-    context = Robolectric.application;
+    context = RuntimeEnvironment.application;
     appWidgetHost = new AppWidgetHost(context, 404);
     shadowAppWidgetHost = shadowOf(appWidgetHost);
   }

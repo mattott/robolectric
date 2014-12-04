@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.TestRunners;
 
 import java.util.ArrayList;
@@ -17,7 +19,7 @@ import java.util.List;
 
 import static android.widget.CursorAdapter.FLAG_AUTO_REQUERY;
 import static android.widget.CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(TestRunners.WithDefaults.class)
 public class CursorAdapterTest {
@@ -60,6 +62,18 @@ public class CursorAdapterTest {
   }
 
   @Test
+  public void testSwapCursor() {
+    assertThat(adapter.getCursor()).isNotNull();
+    assertThat(adapter.getCursor()).isSameAs(curs);
+
+    Cursor oldCursor = adapter.swapCursor(null);
+
+    assertThat(oldCursor).isSameAs(curs);
+    assertThat(curs.isClosed()).isFalse();
+    assertThat(adapter.getCursor()).isNull();
+  }
+
+  @Test
   public void testCount() {
     assertThat(adapter.getCount()).isEqualTo(curs.getCount());
     adapter.changeCursor(null);
@@ -77,10 +91,10 @@ public class CursorAdapterTest {
   public void testGetView() {
     List<View> views = new ArrayList<View>();
     for (int i = 0; i < 5; i++) {
-      views.add(new View(Robolectric.application));
+      views.add(new View(RuntimeEnvironment.application));
     }
 
-    Robolectric.shadowOf(adapter).setViews(views);
+    Shadows.shadowOf(adapter).setViews(views);
 
     for (int i = 0; i < 5; i++) {
       assertThat(adapter.getView(i, null, null)).isSameAs(views.get(i));
@@ -89,20 +103,20 @@ public class CursorAdapterTest {
 
   @Test public void shouldNotRegisterObserversIfNoFlagsAreSet() throws Exception {
     adapter = new TestAdapterWithFlags(curs, 0);
-    assertThat(Robolectric.shadowOf(adapter).mChangeObserver).isNull();
-    assertThat(Robolectric.shadowOf(adapter).mDataSetObserver).isNull();
+    assertThat(Shadows.shadowOf(adapter).mChangeObserver).isNull();
+    assertThat(Shadows.shadowOf(adapter).mDataSetObserver).isNull();
   }
 
   @Test public void shouldRegisterObserversWhenRegisterObserverFlagIsSet() throws Exception {
     adapter = new TestAdapterWithFlags(curs, FLAG_REGISTER_CONTENT_OBSERVER);
-    assertThat(Robolectric.shadowOf(adapter).mChangeObserver).isNotNull();
-    assertThat(Robolectric.shadowOf(adapter).mDataSetObserver).isNotNull();
+    assertThat(Shadows.shadowOf(adapter).mChangeObserver).isNotNull();
+    assertThat(Shadows.shadowOf(adapter).mDataSetObserver).isNotNull();
   }
 
   @Test public void shouldRegisterObserversWhenAutoRequeryFlagIsSet() throws Exception {
     adapter = new TestAdapterWithFlags(curs, FLAG_AUTO_REQUERY);
-    assertThat(Robolectric.shadowOf(adapter).mChangeObserver).isNotNull();
-    assertThat(Robolectric.shadowOf(adapter).mDataSetObserver).isNotNull();
+    assertThat(Shadows.shadowOf(adapter).mChangeObserver).isNotNull();
+    assertThat(Shadows.shadowOf(adapter).mDataSetObserver).isNotNull();
   }
 
   @Test public void shouldNotErrorOnCursorChangeWhenNoFlagsAreSet() throws Exception {
@@ -111,21 +125,10 @@ public class CursorAdapterTest {
     assertThat(adapter.getCursor()).isNotSameAs(curs);
   }
 
-  @Test public void shouldNotInterfereWithSupportCursorAdapter() throws Exception {
-    new android.support.v4.widget.CursorAdapter(Robolectric.application, curs, false) {
-      @Override public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        return null;
-      }
-
-      @Override public void bindView(View view, Context context, Cursor cursor) {
-      }
-    };
-  }
-
   private class TestAdapter extends CursorAdapter {
 
     public TestAdapter(Cursor curs) {
-      super(Robolectric.application, curs, false);
+      super(RuntimeEnvironment.application, curs, false);
     }
 
     @Override
@@ -140,7 +143,7 @@ public class CursorAdapterTest {
 
   private class TestAdapterWithFlags extends CursorAdapter {
     public TestAdapterWithFlags(Cursor c, int flags) {
-      super(Robolectric.application, c, flags);
+      super(RuntimeEnvironment.application, c, flags);
     }
 
     @Override public View newView(Context context, Cursor cursor, ViewGroup parent) {
